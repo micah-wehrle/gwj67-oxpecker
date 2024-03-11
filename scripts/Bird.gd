@@ -1,11 +1,16 @@
 extends Node2D
 
 @onready var grid = %Grid;
+@onready var blood_bar = %"Blood Bar";
+@onready var blood_emitter = $"Blood Emitter" as CPUParticles2D;
+
+var can_move = true;
 
 var flying = false;
 var flying_dir = 0;
 var target_pos;
 
+var current_animal;
 
 const FLY_SPEED = 400.0;
 
@@ -19,12 +24,15 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if !can_move:
+		return;
 	
 	if !flying:
 		if get_dir_input():
 			begin_flight(get_dir_input());
 		elif Input.is_action_just_pressed("Spacebar"):
-			do_peck();
+			if current_animal:
+				do_peck();
 	else:
 		# gross. Wondering if the direction should just be a vector
 		position.x = move_toward(position.x, target_pos.x, FLY_SPEED * delta);
@@ -33,10 +41,10 @@ func _process(delta):
 		if position.distance_to(target_pos) < 0.000001:
 			position = target_pos;
 			
-			var beast = tile_on_beast();
-			if beast:
+			current_animal = tile_on_beast();
+			if current_animal:
 				stop_flying();
-				reparent(beast); # do we want to save the beast?
+				reparent(current_animal);
 				
 			elif tile_is_dangerous():
 				# game over
@@ -81,12 +89,35 @@ func get_dir_vector(dir):
 	return Vector2();
 	
 func do_peck():
+	try_to_bleed();
+	current_animal.connect('end_reaction_signal', end_animal_reaction);
+	current_animal.peck()
+	can_move = false;
 	pass;
 
 func tile_on_beast():
 	return grid.is_animal(global_position);
-	pass;
 
 func tile_is_dangerous():
-	pass;
+	var grid_pos = grid.calc_grid_pos(global_position);
 	
+	if grid_pos.x < 0 or grid_pos.y < 0 or grid_pos.x >= grid.grid_width or grid_pos.y >= grid.grid_height:
+		return true;
+	elif grid.is_pos_dangerous(grid_pos):
+		return true;
+	return false;
+	pass;
+
+func end_animal_reaction():
+	can_move = true;
+	current_animal.disconnect('end_reaction_signal', end_animal_reaction);
+	pass
+
+func try_to_bleed():
+	var blood_drained = current_animal.get_blood();
+	if blood_drained:
+		blood_emitter.restart();
+		blood_emitter.emitting = true;
+		blood_bar.add_blood(blood_drained);
+	else:
+		pass; #handle no blood left?

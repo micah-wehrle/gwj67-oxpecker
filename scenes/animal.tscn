@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://ne4q7ef0brwl"]
+
+[ext_resource type="Script" path="res://scripts/Animal.gd" id="1_weynm"]
+[ext_resource type="Texture2D" uid="uid://bh1758u43wegd" path="res://res/arrow.png" id="2_hd6x3"]
+[ext_resource type="Texture2D" uid="uid://vr6dkb0ef70e" path="res://res/red x.png" id="3_k5kwv"]
+
+[node name="Animal" type="Node2D"]
+script = ExtResource("1_weynm")
+
+[node name="Sprites" type="Node2D" parent="."]
+
+[node name="Body Sprite" type="Sprite2D" parent="Sprites"]
+z_index = -5
+
+[node name="Dir Arrow" type="Node2D" parent="Sprites"]
+
+[node name="Dir Arrow Sprite" type="Sprite2D" parent="Sprites/Dir Arrow"]
+z_index = -6
+texture = ExtResource("2_hd6x3")
+
+[node name="Danger Space Sprite" type="Sprite2D" parent="Sprites/Dir Arrow"]
+self_modulate = Color(1, 1, 1, 0.568627)
+texture = ExtResource("3_k5kwv")

@@ -12,17 +12,17 @@ var do_checkerboard = true;
 
 @onready var grass_texture = load("res://res/grass.png");
 
-@onready var grid_parent = Node2D.new();
-@onready var animals_parent = Node2D.new();
+@onready var grid_parent = %"Grid Parent";
+@onready var animals_parent = %"Animals Parent";
+
+@onready var animal_scene = preload("res://scenes/animal.tscn");
 
 
 func _ready():
-	add_child(grid_parent);
-	add_child(animals_parent);
-	
 	make_grid();
 	
-	make_animal("cow", Vector2(2, 3), 3);
+	make_animal("cow", Vector2(2, 3), 1);
+	make_animal("deer", Vector2(6, 1), 3);
 
 func _process(delta):
 	pass
@@ -57,18 +57,12 @@ func delete_grid():
 		node.queue_free();
 
 func make_animal(type, pos, dir):
-	var animal = Sprite2D.new();
+	
+	var animal = animal_scene.instantiate();
+	
 	animals_parent.add_child(animal);
 	
-	match(type):
-		"cow":
-			animal.texture = load("res://res/cow.png"); # should pre-load for reuse
-	
-	var tile_scale = tile_size / canvas_size;
-	animal.scale = Vector2(tile_scale, tile_scale);
-	
-	animal.position = pos * (tile_size + tile_spacing);
-	animal.rotation_degrees = -180 + dir * 90;
+	animal.init(type, tile_size, tile_spacing, pos * (tile_size + tile_spacing), dir);
 	
 
 func is_animal(pos):
@@ -76,3 +70,9 @@ func is_animal(pos):
 		if pos.distance_to(animal.global_position) < 1:
 			return animal;
 	return null;
+
+func is_pos_dangerous(pos):
+	pass;
+
+func calc_grid_pos(pos):
+	return round( (pos - global_position) / (tile_size + tile_spacing) );
