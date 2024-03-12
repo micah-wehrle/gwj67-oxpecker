@@ -1,0 +1,185 @@
+[gd_scene load_steps=2 format=3 uid="uid://t17wff0h5nue"]
+
+[ext_resource type="Script" path="res://scripts/Blood Warning.gd" id="1_gvo3d"]
+
+[node name="Blood Warning" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("1_gvo3d")
+
+[node name="Warning Group" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="WARNING" type="Label" parent="Warning Group"]
+self_modulate = Color(1, 0, 0, 1)
+z_index = 1
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -747.0
+offset_top = -48.0
+offset_right = 747.0
+offset_bottom = 306.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 150
+text = "WARNING"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WARNING2" type="Label" parent="Warning Group"]
+self_modulate = Color(0.301961, 0.121569, 0.121569, 1)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -737.0
+offset_top = -37.0
+offset_right = 757.0
+offset_bottom = 317.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 150
+text = "WARNING"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Text 1" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Text 1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -593.0
+offset_top = -213.0
+offset_right = 593.0
+offset_bottom = 108.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "THE FOLLOWING GAME CONTAINS CARTOON DEPICTIONS OF BLOOD WHICH MAY BE DISTURBING TO SOME PLAYERS. BUT SERIOUSLY IT'S LIKE NOT THAT BIG OF A DEAL, IT'S A PIXEL ART GAME SO YOU'LL PROBBLY BE FINE. JUST A FEW RED PIXELS HERE AND THERE."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Label2" type="Label" parent="Text 1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -593.0
+offset_top = 19.0
+offset_right = 593.0
+offset_bottom = 96.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "AS SUCH, VIEWER DISCRETION IS ADVISED."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Text 2" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Text 2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -593.0
+offset_top = 129.0
+offset_right = 593.0
+offset_bottom = 258.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "OPTIONALLY, YOU MAY DISABLE THE BLOOD PRIOR TO PLAYING, IF THAT WOULD MAKE YOU FEEL MORE COMFORTABLE."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Buttons" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 696.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="Buttons"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -604.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="Buttons/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -63.0
+offset_right = 250.0
+offset_bottom = 63.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/icon_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 45
+text = "NORMAL MODE"
+
+[node name="Control2" type="Control" parent="Buttons"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 612.0
+offset_right = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="Buttons/Control2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -254.5
+offset_top = -63.0
+offset_right = 254.5
+offset_bottom = 63.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/icon_hover_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 45
+text = "BLOODLESS MODE"
