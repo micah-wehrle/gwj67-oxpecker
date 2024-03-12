@@ -1,0 +1,107 @@
+[gd_scene load_steps=9 format=3 uid="uid://uex46dpftd8v"]
+
+[ext_resource type="Texture2D" uid="uid://v3ddhlocr6on" path="res://res/oxpecker1-Sheet.png" id="1_dsga1"]
+[ext_resource type="Script" path="res://scripts/Bird Sprite.gd" id="2_tmlht"]
+[ext_resource type="Texture2D" uid="uid://5x6mwdskt2tj" path="res://res/blood drip.png" id="3_3a18c"]
+
+[sub_resource type="Animation" id="Animation_qxyvx"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_cr70x"]
+resource_name = "flying"
+length = 0.5
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [2, 3, 4, 5, 6]
+}
+
+[sub_resource type="Animation" id="Animation_ryxsf"]
+resource_name = "peck"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+
+[sub_resource type="Animation" id="Animation_gwhc2"]
+resource_name = "resting"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1jjwf"]
+_data = {
+"RESET": SubResource("Animation_qxyvx"),
+"flying": SubResource("Animation_cr70x"),
+"peck": SubResource("Animation_ryxsf"),
+"resting": SubResource("Animation_gwhc2")
+}
+
+[node name="Bird Sprite" type="Sprite2D"]
+texture_filter = 1
+scale = Vector2(11.25, 11.25)
+texture = ExtResource("1_dsga1")
+hframes = 7
+script = ExtResource("2_tmlht")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_1jjwf")
+}
+
+[node name="Blood Emitter" type="CPUParticles2D" parent="."]
+unique_name_in_owner = true
+scale = Vector2(0.0888889, 0.0888889)
+emitting = false
+amount = 10
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+texture = ExtResource("3_3a18c")
+direction = Vector2(0, -10)
+initial_velocity_max = 354.6
+linear_accel_min = 100.0
+linear_accel_max = 100.0
+scale_amount_min = 0.03
+scale_amount_max = 0.03
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_animation_finished"]

@@ -1,0 +1,159 @@
+[gd_scene load_steps=4 format=3 uid="uid://56sv35key23x"]
+
+[ext_resource type="Script" path="res://scripts/Intro.gd" id="1_octaw"]
+[ext_resource type="Texture2D" uid="uid://dmq3bjqrrxokl" path="res://res/cloud1.png" id="2_6hjtt"]
+[ext_resource type="PackedScene" uid="uid://uex46dpftd8v" path="res://scenes/bird_sprite.tscn" id="3_xkt36"]
+
+[node name="Intro" type="ColorRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.666667, 0.819608, 1)
+script = ExtResource("1_octaw")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -543.0
+offset_top = 163.0
+offset_right = 557.0
+offset_bottom = 397.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 150
+text = "Oxpecker"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -517.0
+offset_top = 402.0
+offset_right = 531.0
+offset_bottom = 636.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 40
+text = "A bird which rides on the backs of large mammals, eating ticks and other pests."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Description2" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -517.0
+offset_top = 580.0
+offset_right = 531.0
+offset_bottom = 656.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 40
+text = "It also..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Drinks" type="Label" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -430.0
+offset_top = 682.0
+offset_right = 91.0
+offset_bottom = 809.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 90
+text = "DRINKS"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Their" type="Label" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 0, 0, 1)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -73.0
+offset_top = 682.0
+offset_right = 448.0
+offset_bottom = 809.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 90
+text = "THEIR"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Scientific Name" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -543.0
+offset_top = 391.0
+offset_right = 557.0
+offset_bottom = 455.0
+grow_horizontal = 2
+theme_override_font_sizes/italics_font_size = 30
+bbcode_enabled = true
+text = "[center][i]buphagus africanus[/i][/center]"
+
+[node name="Cloud1" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(171, 201)
+scale = Vector2(8, 8)
+texture = ExtResource("2_6hjtt")
+
+[node name="Cloud2" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(1515, 565)
+scale = Vector2(10.0312, 10.0312)
+texture = ExtResource("2_6hjtt")
+flip_h = true
+
+[node name="Bird Sprite" parent="." instance=ExtResource("3_xkt36")]
+unique_name_in_owner = true
+position = Vector2(-461, 382)
+
+[node name="1" type="Marker2D" parent="Bird Sprite"]
+scale = Vector2(0.0888889, 0.0888889)
+
+[node name="Move Nodes" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="1" type="Marker2D" parent="Move Nodes"]
+position = Vector2(-469, 528)
+
+[node name="2" type="Marker2D" parent="Move Nodes"]
+position = Vector2(529, 147)
+
+[node name="3" type="Marker2D" parent="Move Nodes"]
+position = Vector2(629, 177)
+
+[node name="4" type="Marker2D" parent="Move Nodes"]
+position = Vector2(720, 178)
+
+[node name="Red Overlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+z_index = 100
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0, 0, 0)

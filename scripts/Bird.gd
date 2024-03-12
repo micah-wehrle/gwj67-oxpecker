@@ -2,7 +2,8 @@ extends Node2D
 
 @onready var grid = %Grid;
 @onready var blood_bar = %"Blood Bar";
-@onready var blood_emitter = $"Blood Emitter" as CPUParticles2D;
+@onready var blood_emitter = %"Blood Emitter" as CPUParticles2D;
+@onready var bird_sprite = %"Bird Sprite" as Sprite2D;
 
 var can_move = true;
 
@@ -19,6 +20,7 @@ const FLY_SPEED = 400.0;
 func _ready():
 	var start_pos = Vector2(0,3);
 	global_position = grid.global_position + start_pos * (grid.tile_size + grid.tile_spacing);
+	bird_sprite.scale = (Vector2(grid.tile_size, grid.tile_size) / Vector2(bird_sprite.texture.get_height(), bird_sprite.texture.get_height())) * 0.8;
 	pass 
 
 
@@ -58,10 +60,18 @@ func begin_flight(dir):
 	reparent(grid);
 	flying_dir = dir
 	flying = true;
+	bird_sprite.animate("flying");
+	
+	if dir == 2:
+		bird_sprite.flip_h = false;
+	elif dir == 4:
+		bird_sprite.flip_h = true;
+	
 	var tile_space = (grid.tile_size + grid.tile_spacing);
 	target_pos = position + get_dir_vector(flying_dir) * tile_space;
 
 func stop_flying():
+	bird_sprite.animate("resting");
 	flying = false;
 	flying_dir = 0;
 
@@ -90,6 +100,7 @@ func get_dir_vector(dir):
 	
 func do_peck():
 	try_to_bleed();
+	bird_sprite.animate("peck");
 	current_animal.connect('end_reaction_signal', end_animal_reaction);
 	current_animal.peck()
 	can_move = false;
@@ -116,8 +127,7 @@ func end_animal_reaction():
 func try_to_bleed():
 	var blood_drained = current_animal.get_blood();
 	if blood_drained:
-		blood_emitter.restart();
-		blood_emitter.emitting = true;
+		bird_sprite.bleed();
 		blood_bar.add_blood(blood_drained);
 	else:
 		pass; #handle no blood left?

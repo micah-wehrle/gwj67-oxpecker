@@ -1,10 +1,9 @@
-[gd_scene load_steps=10 format=3 uid="uid://ds77v8dt1we8g"]
+[gd_scene load_steps=9 format=3 uid="uid://ds77v8dt1we8g"]
 
-[ext_resource type="Texture2D" uid="uid://w7iarhpe2qu8" path="res://res/bird.png" id="1_046tm"]
 [ext_resource type="Script" path="res://scripts/Bird.gd" id="1_cpk6n"]
 [ext_resource type="Script" path="res://scripts/Grid.gd" id="2_gq6m5"]
 [ext_resource type="Texture2D" uid="uid://ccnppldyfqd8" path="res://res/vial1/bottom vial.png" id="3_qvpt7"]
-[ext_resource type="Texture2D" uid="uid://5x6mwdskt2tj" path="res://res/blood drip.png" id="4_2xhjj"]
+[ext_resource type="PackedScene" uid="uid://uex46dpftd8v" path="res://scenes/bird_sprite.tscn" id="3_ubdla"]
 [ext_resource type="Script" path="res://scripts/CanvasLayer.gd" id="4_axjsh"]
 [ext_resource type="Texture2D" uid="uid://ca7htac5qawpk" path="res://res/vial1/vial blood.png" id="4_yvomo"]
 [ext_resource type="Script" path="res://scripts/Blood Bar.gd" id="5_ewaen"]
@@ -21,24 +20,8 @@ script = ExtResource("2_gq6m5")
 position = Vector2(1243, 560)
 script = ExtResource("1_cpk6n")
 
-[node name="Sprite2D" type="Sprite2D" parent="Grid/Bird"]
-z_index = 2
-scale = Vector2(0.113684, 0.113684)
-texture = ExtResource("1_046tm")
-
-[node name="Blood Emitter" type="CPUParticles2D" parent="Grid/Bird"]
-emitting = false
-amount = 10
-lifetime = 0.5
-one_shot = true
-explosiveness = 1.0
-texture = ExtResource("4_2xhjj")
-direction = Vector2(0, -10)
-initial_velocity_max = 354.6
-linear_accel_min = 100.0
-linear_accel_max = 100.0
-scale_amount_min = 0.03
-scale_amount_max = 0.03
+[node name="Bird Sprite" parent="Grid/Bird" instance=ExtResource("3_ubdla")]
+unique_name_in_owner = true
 
 [node name="Grid Parent" type="Node2D" parent="Grid"]
 unique_name_in_owner = true
