@@ -9,24 +9,49 @@ extends ColorRect
 @onready var drinks = %Drinks
 @onready var their = %Their
 @onready var red_overlay = %"Red Overlay"
+@onready var blood = %Blood
+@onready var scientific_name = %"Scientific Name"
 
 const FADE_IN_RATE = 1;
 const FLY_RATE = 600;
 const HOP_X_RATE = 1000;
 const HOP_Y_SIZE = 40;
+const RED_FADE = 1.2;
+const RED_OVERLAY_A = 0.7;
+
+const DRINKS_THEIR_DELAY = 500;
 
 var true_pos;
 var advance_phase;
 @export var phase = "fade in";
+var last_peck = false;
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	modulate = Color.BLACK;
 	
+	if !persist.show_blood:
+		drinks.text = "GIVES";
+		their.text = "THEM";
+		blood.text = "LOVE <3";
+		
+		var pink = Color.HOT_PINK; # or maybe eb3deb ?
+		
+		drinks.self_modulate = pink;
+		their.self_modulate = pink;
+		blood.self_modulate = pink;
+		
+		red_overlay.color = pink;
+		red_overlay.color.a = 0;
+		
+		
+		
+	
 	description.modulate.a = 0;
 	description_2.modulate.a = 0;
 	drinks.modulate.a = 0;
 	their.modulate.a = 0;
+	blood.modulate.a = 0;
 	
 	return;
 	# TEST SECTION
@@ -56,11 +81,11 @@ func _process(delta):
 		bird_sprite.global_position = bird_sprite.global_position.move_toward(pos(2), FLY_RATE * delta);
 		
 		true_pos = bird_sprite.global_position;
-		description.modulate.a = progress(1,2);
+		description.modulate.a = progress(1,2)*1.5;
 		
 		if bird_sprite.global_position == pos(2):
 			phase = "wait1";
-			advance_phase = Time.get_ticks_msec() + 1000;
+			advance_phase = Time.get_ticks_msec() + 2000;
 			bird_sprite.animate("resting");
 			description.modulate.a = 1;
 		
@@ -71,6 +96,7 @@ func _process(delta):
 		if hop(3, delta):
 			phase = "wait2";
 			advance_phase = Time.get_ticks_msec() + 200;
+			description_2.modulate.a = 1;
 			
 	elif phase == "wait2":
 		wait_then("hop2");
@@ -78,20 +104,68 @@ func _process(delta):
 	elif phase == "hop2":
 		if hop(4, delta):
 			phase = "wait3";
-			advance_phase = Time.get_ticks_msec() + 1000;
-		
+			advance_phase = Time.get_ticks_msec() + 3000;
 	elif phase == "wait3":
 		wait_then("peck");
 	elif phase == "peck":
 		bird_sprite.animate("peck");
-		phase = "end";
-		pass;
-	elif phase == "":
-		pass;
-	elif phase == "":
-		pass;
-	elif phase == "":
-		pass;
+		description.modulate.a = 0;
+		description_2.modulate.a = 0;
+		scientific_name.modulate.a = 0;
+		drinks.modulate.a = 1;
+		phase = "red shift 1"
+		red_overlay.color.a = RED_OVERLAY_A;
+	elif phase == "red shift 1":
+		red_overlay.color.a -= RED_FADE * delta;
+		if red_overlay.color.a <= 0:
+			phase = "wait4"
+			advance_phase = Time.get_ticks_msec() + DRINKS_THEIR_DELAY;
+		
+	elif phase == "wait4":
+		if wait_then("red shift 2"):
+			bird_sprite.animate("peck");
+			their.modulate.a = 1;
+			red_overlay.color.a = RED_OVERLAY_A;
+	elif phase == "red shift 2":
+		red_overlay.color.a -= RED_FADE * delta;
+		if red_overlay.color.a <= 0:
+			phase = "wait5"
+			advance_phase = Time.get_ticks_msec() + DRINKS_THEIR_DELAY;
+	elif phase == "wait5":
+		if wait_then("peck2"):
+			bird_sprite.animate("peck");
+			(bird_sprite.animation_player as AnimationPlayer).connect("animation_finished", _anim_fin);
+	elif phase == "peck2":
+		if last_peck:
+			phase = "blood wash"
+			blood.modulate.a = 1;
+			red_overlay.color.a = 1;
+			
+			drinks.z_index = 15;
+			their.z_index = 15;
+			blood.z_index = 15;
+			bird_sprite.z_index = 15;
+	elif phase == "blood wash":
+		red_overlay.color.r -= RED_FADE * delta;
+		red_overlay.color.g -= RED_FADE * delta;
+		red_overlay.color.b -= RED_FADE * delta;
+		if red_overlay.color.r <= 0:
+			phase = "wait6";
+			advance_phase = Time.get_ticks_msec() + 3000; # start blood fade out
+	elif phase == "wait6":
+		wait_then("blood fade");
+	elif phase == "blood fade":
+		blood.modulate.a -= RED_FADE * delta;
+		drinks.modulate.a = blood.modulate.a;
+		their.modulate.a = blood.modulate.a;
+		bird_sprite.modulate.a = blood.modulate.a;
+		if blood.modulate.a <= 0:
+			phase = "wait7";
+			advance_phase = Time.get_ticks_msec() + 1500; # jump to game
+	elif phase == "wait7":
+		if wait_then("end"):
+			get_tree().change_scene_to_file("res://scenes/world.tscn");
+			pass;
 	elif phase == "":
 		pass;
 	elif phase == "":
@@ -125,3 +199,6 @@ func wait_then(next):
 		phase = next;
 		return true;
 	return false;
+
+func _anim_fin(anim_name):
+	last_peck = true;

@@ -77,6 +77,7 @@ _data = {
 }
 
 [node name="Bird Sprite" type="Sprite2D"]
+z_index = 10
 texture_filter = 1
 scale = Vector2(11.25, 11.25)
 texture = ExtResource("1_dsga1")

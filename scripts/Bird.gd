@@ -21,7 +21,7 @@ func _ready():
 	var start_pos = Vector2(0,3);
 	global_position = grid.global_position + start_pos * (grid.tile_size + grid.tile_spacing);
 	bird_sprite.scale = (Vector2(grid.tile_size, grid.tile_size) / Vector2(bird_sprite.texture.get_height(), bird_sprite.texture.get_height())) * 0.8;
-	pass 
+	grid.connect("animals_are_acting", _animal_acting_state_changed);
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -101,9 +101,7 @@ func get_dir_vector(dir):
 func do_peck():
 	try_to_bleed();
 	bird_sprite.animate("peck");
-	current_animal.connect('end_reaction_signal', end_animal_reaction);
 	current_animal.peck()
-	can_move = false;
 	pass;
 
 func tile_on_beast():
@@ -119,11 +117,6 @@ func tile_is_dangerous():
 	return false;
 	pass;
 
-func end_animal_reaction():
-	can_move = true;
-	current_animal.disconnect('end_reaction_signal', end_animal_reaction);
-	pass
-
 func try_to_bleed():
 	var blood_drained = current_animal.get_blood();
 	if blood_drained:
@@ -131,3 +124,10 @@ func try_to_bleed():
 		blood_bar.add_blood(blood_drained);
 	else:
 		pass; #handle no blood left?
+
+func _animal_acting_state_changed(state):
+	
+	if state:
+		can_move = false
+	else:
+		can_move = true;
