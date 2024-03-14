@@ -9,7 +9,7 @@ var bar_velocity = 0.0;
 const STIFFNESS = 0.4;
 const DAMPING = 0.9;
 
-@onready var bar = $"Blood Progress" as TextureProgressBar;
+@onready var bar = $"Sub box/Blood Progress" as TextureProgressBar;
 
 func _ready():
 	pass # Replace with function body.

@@ -5,6 +5,7 @@ extends Sprite2D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	blood_emitter.self_modulate = Color.PINK if !persist.show_blood else Color.RED;
 	pass # Replace with function body.
 
 

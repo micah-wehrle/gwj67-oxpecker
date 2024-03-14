@@ -38,8 +38,13 @@ signal reaction_state_changed;
 @onready var danger_sprite = $"Sprites/Dir Arrow/Danger Space Sprite" as Sprite2D;
 
 var dangerous = true;
-var can_move = true;
+var pushable = true;
 var peckable = true;
+var can_step = true;
+var bully = false;
+var strongman = false;
+var destory_on_muscle = false;
+var slow_af = false;
 
 func init(animal_id, type, sprite_target_size, tile_spacing, pos, facing_dir, the_grid):
 	self.animal_id = animal_id;
@@ -60,25 +65,44 @@ func init(animal_id, type, sprite_target_size, tile_spacing, pos, facing_dir, th
 	blood_per_peck = 5;
 	
 	var tex;
-	var sprite_scale_mult = 1;
+	var sprite_scale_mult = 0.85;
 	match(type):
 		"cow":
 			tex = "res://res/cow1.png"; # should pre-load for reuse?
-			sprite_scale_mult = 0.85;
 		"deer":
-			tex = "res://res/deer.png";
+			tex = "res://res/deer1.png";
 		"stump":
 			tex = "res://res/stump1.png";
 			dangerous = false;
-			can_move = false;
+			can_step = false;
+			pushable = false;
 			peckable = false;
+			destory_on_muscle = true;
 			sprite_scale_mult = 0.65;
+		"rhino":
+			tex = "res://res/rhino.png";
+			pushable = false;
+			bully = true;
+		"gorilla":
+			tex = "res://res/gorilla1.png";
+			pushable = false;
+			bully = true;
+			strongman = true;
+		"lion":
+			tex = "res://res/lion.png";
+			pushable = false;
+			can_step = false;
+		"turtle":
+			tex = "res://res/turtle1.png";
+			slow_af = true;
+		
 	
 	var texture = load(tex) as CompressedTexture2D;
 	
 	body_sprite.texture = texture;
 	body_sprite.scale = target_size_vec / texture.get_size() * sprite_scale_mult;
 	body_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST;
+	body_sprite.flip_h = randf() < 0.5;
 	
 	arrow_sprite.scale = target_size_vec / arrow_sprite.texture.get_size() * Vector2(1, 0.7);
 	danger_sprite.scale = target_size_vec / danger_sprite.texture.get_size();
@@ -87,7 +111,7 @@ func init(animal_id, type, sprite_target_size, tile_spacing, pos, facing_dir, th
 	# Do this before rotating the arrow as it is a child of the arrow
 	danger_sprite.position.x = sprite_target_size + tile_spacing;
 	
-	arrow_sprite.visible = can_move;
+	arrow_sprite.visible = can_step;
 	danger_sprite.visible = dangerous;
 	
 	rotate_arrow_to_dir();
@@ -116,36 +140,103 @@ func _process(delta):
 		
 		# Otherwise, do the current reaction:
 		else: 
-			if current_reaction["action"] == "move":
+			if current_reaction["action"] == "move" or current_reaction["action"] == "bump" or current_reaction["action"] == "charge" or current_reaction["action"] == "muscle":
 				
 				if !targ_move_pos:
 					targ_move_pos = position;
 					start_move_pos = position;
 					true_move_pos = position;
 					var temp_global = global_position;
-					if facing_dir == 1 or facing_dir == 3:
-						var offset = (facing_dir-2) * (sprite_target_size + tile_spacing);
+					
+					var facing_to_use = facing_dir if current_reaction["value"] == -1 else current_reaction["value"];
+					
+					if facing_to_use == 1 or facing_to_use == 3:
+						var offset = (facing_to_use-2) * (sprite_target_size + tile_spacing);
 						targ_move_pos.y += offset;
 						temp_global.y += offset;
-					elif facing_dir == 2 or facing_dir == 4:
-						var offset = (facing_dir-3) * (sprite_target_size + tile_spacing);
+					elif facing_to_use == 2 or facing_to_use == 4:
+						var offset = (facing_to_use-3) * (sprite_target_size + tile_spacing);
 						targ_move_pos.x -= offset;
 						temp_global.x -= offset;
+						
+					var hit_animal = grid.is_pos_animal(temp_global)
+					var hit_wall = grid.is_pos_wall(temp_global)
 					
-					if grid.is_animal(temp_global):
+					if hit_animal or hit_wall:
 						
 						# TODO add run into effect!
-						targ_move_pos = null;
-						action_queue = [];
+						#targ_move_pos = null;
+						if current_reaction["action"] == "move":
+							action_queue = [{
+								"action": "bump",
+								"value": 2
+							}];
+						elif current_reaction["action"] == "charge":
+							if hit_animal and hit_animal.pushable and bully:
+								action_queue.push_front({
+									"action": "bump",
+									"value": 2,
+									"bullied animal": hit_animal
+								})
+							else:
+								action_queue.push_front({
+									"action": "bump",
+									"value": 2,
+								})
+						elif current_reaction["action"] == "muscle":
+							if hit_animal:
+								if hit_animal.pushable and bully:
+									action_queue.push_front({
+										"action": "bump",
+										"value": 2,
+										"bullied animal": hit_animal
+									})
+								elif !hit_animal.pushable and strongman and hit_animal.destory_on_muscle:
+									action_queue.push_front({ # make this an overwrite?
+										"action": "bump",
+										"value": 2,
+										"bullied animal": hit_animal,
+										"destory animal": true
+									})
+							else:
+								action_queue.push_front({
+									"action": "bump",
+									"value": 2,
+								})
 						fulfilling_single_action = false;
 				
 				if fulfilling_single_action:
-					true_move_pos = true_move_pos.move_toward(targ_move_pos, MOVE_SPEED * delta);
-					var temp_scale = sin(PI * (true_move_pos.distance_to(targ_move_pos) / start_move_pos.distance_to(targ_move_pos)))
-					scale = Vector2(1 + temp_scale * 0.15, 1 + temp_scale * 0.15);
-					position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2);
+					var slow_offset = 1 if !("slow" in current_reaction) else 0.01;
+					true_move_pos = true_move_pos.move_toward(targ_move_pos, MOVE_SPEED * delta * slow_offset);
+					var hop_progress = (true_move_pos.distance_to(targ_move_pos) / start_move_pos.distance_to(targ_move_pos));
+					var temp_scale = sin(PI * hop_progress)
+					scale = Vector2(1 + temp_scale * 0.15 * slow_offset, 1 + temp_scale * 0.15 * slow_offset);
+					
+					if current_reaction["action"] == "move":
+						position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2 * slow_offset);
+					else:
+						if hop_progress <= 0.5 and current_reaction["value"] == 2:
+							if bully and "bullied animal" in current_reaction:
+								if "destory animal" in current_reaction:
+									current_reaction["bullied animal"].queue_free();
+								else:
+									current_reaction["bullied animal"].independant_react([{
+										"action": "move",
+										"value": facing_dir
+									}]);
+							current_reaction["value"] = 3;
+							var temp = targ_move_pos;
+							targ_move_pos = start_move_pos;
+							start_move_pos = temp;
+							
+						position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2);
+						
 					if true_move_pos == targ_move_pos:
 						position = true_move_pos;
+						
+						if current_reaction["action"] == "charge":
+							action_queue.push_front(current_reaction);
+								
 						targ_move_pos = null;
 						fulfilling_single_action = false; 
 			
@@ -162,11 +253,6 @@ func _process(delta):
 					
 					if targ_dir == -180 and dir_arrow.rotation_degrees == 270:
 						targ_dir = 180;
-						
-					#print(facing_dir);
-					#print(dir_arrow.rotation_degrees);
-					#print(targ_dir);
-					#print('--');
 					
 				dir_arrow.rotation_degrees = move_toward(dir_arrow.rotation_degrees, targ_dir, ROT_SPEED * delta);
 				
@@ -184,7 +270,11 @@ func _process(delta):
 			elif current_reaction["action"] == "wait":
 				if Time.get_ticks_msec() - reaction_start_time >= current_reaction["value"]:
 					fulfilling_single_action = false;
-				
+			
+			elif current_reaction["action"] == "roar":
+				grid.give_queue_to_all_animals(null, self);
+				fulfilling_single_action = false;
+				pass;
 			pass;
 		pass;
 	
@@ -202,12 +292,20 @@ func rotate_arrow_to_dir():
 
 func peck():
 	
+	if !peckable:
+		return;
+	
 	# Make the animal pause before the first reaction
 	action_queue.push_back({
 		"action": "wait",
 		"value": 250 #ms
 	})
 	
+	build_own_queue();
+	
+	change_reaction_state(true);
+
+func build_own_queue():
 	match(type):
 		"cow":
 			move(1);
@@ -216,22 +314,30 @@ func peck():
 			turn(-1);
 		"lion":
 			special("roar");
-	
-	change_reaction_state(true);
-	danger_sprite.self_modulate.a = 0;
+		"rhino":
+			special("charge");
+			turn(1);
+		"gorilla":
+			special("muscle");
+		"turtle":
+			action_queue.push_back({
+				"action": "move",
+				"value": -1,
+				"slow": true
+			});
+			
 
 func independant_react(queue_entry:Array):
 	for action in queue_entry:
 		action_queue.push_back(action);
 	
 	change_reaction_state(true);
-	danger_sprite.self_modulate.a = 0;
 
 func move(amt):
 	for i in amt:
 		action_queue.push_back({
 			"action": "move",
-			"value": 1
+			"value": -1
 		});
 
 func turn(amt):
@@ -247,16 +353,34 @@ func turn(amt):
 
 func special(spec):
 	action_queue.push_back({
-		"action": "special",
-		"value": spec
+		"action": spec,
+		"value": -1
 	});
 
 func change_reaction_state(state):
 	reacting_to_event = state;
 	reaction_state_changed.emit(animal_id, state);
+	danger_sprite.self_modulate.a = 0;
 
 func get_blood():
+	if !peckable: 
+		return 0;
+	
 	var new_blood = max(blood_total - blood_per_peck, 0);
 	var output = blood_total - new_blood;
 	blood_total = new_blood;
 	return output;
+
+func get_texture():
+	return body_sprite.texture;
+
+func get_attack_grid_pos():
+	var output_pos = global_position;
+	if facing_dir == 1 or facing_dir == 3:
+		var offset = (facing_dir-2) * (sprite_target_size + tile_spacing);
+		output_pos.y += offset;
+	elif facing_dir == 2 or facing_dir == 4:
+		var offset = (facing_dir-3) * (sprite_target_size + tile_spacing);
+		output_pos.x -= offset;
+	
+	return grid.calc_grid_pos(output_pos);

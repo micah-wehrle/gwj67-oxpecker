@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://v3ddhlocr6on" path="res://res/oxpecker1-Sheet.png" id="1_dsga1"]
 [ext_resource type="Script" path="res://scripts/Bird Sprite.gd" id="2_tmlht"]
-[ext_resource type="Texture2D" uid="uid://5x6mwdskt2tj" path="res://res/blood drip.png" id="3_3a18c"]
+[ext_resource type="Texture2D" uid="uid://c5e0eqb8xlfi6" path="res://res/single_pixel.png" id="3_m8fuc"]
 
 [sub_resource type="Animation" id="Animation_qxyvx"]
 length = 0.001
@@ -91,18 +91,19 @@ libraries = {
 
 [node name="Blood Emitter" type="CPUParticles2D" parent="."]
 unique_name_in_owner = true
+self_modulate = Color(1, 0, 0, 1)
 scale = Vector2(0.0888889, 0.0888889)
 emitting = false
 amount = 10
 lifetime = 0.5
 one_shot = true
 explosiveness = 1.0
-texture = ExtResource("3_3a18c")
+texture = ExtResource("3_m8fuc")
 direction = Vector2(0, -10)
 initial_velocity_max = 354.6
 linear_accel_min = 100.0
 linear_accel_max = 100.0
-scale_amount_min = 0.03
-scale_amount_max = 0.03
+scale_amount_min = 10.0
+scale_amount_max = 10.0
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_animation_finished"]

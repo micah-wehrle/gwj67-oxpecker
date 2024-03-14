@@ -23,7 +23,7 @@ vframes = 2
 
 [node name="Danger Space Sprite" type="Sprite2D" parent="Sprites/Dir Arrow"]
 self_modulate = Color(1, 1, 1, 0.219608)
-z_index = 4
+z_index = 6
 texture_filter = 1
 texture = ExtResource("2_wxj3o")
 hframes = 2
