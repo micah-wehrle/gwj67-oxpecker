@@ -21,11 +21,9 @@ var current_animal;
 const FLY_SPEED = 400.0;
 
 func _ready():
-	var start_pos = Vector2(0,3);
-	global_position = grid.global_position + start_pos * (grid.tile_size + grid.tile_spacing);
 	bird_sprite.scale = (Vector2(grid.tile_size, grid.tile_size) / Vector2(bird_sprite.texture.get_height(), bird_sprite.texture.get_height())) * 0.8;
 	grid.connect("animals_are_acting", _animal_acting_state_changed);
-	grid.connect('ready', get_ready);
+	grid.connect('ready', _get_ready);
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -70,10 +68,17 @@ func _process(delta):
 			else: # keep flying!
 				begin_flight(flying_dir);
 				
-func get_ready():
+func _get_ready():
+	if !grid.bird_start_pos:
+		print("no bird pos");
+		persist.current_level = 0;
+		get_tree().reload_current_scene();
+		return;
+	global_position = grid.bird_start_pos;
+	
 	current_animal = tile_on_beast();
 	update_riding_texture();
-	grid.disconnect('ready', get_ready);
+	grid.disconnect('ready', _get_ready);
 	
 	wind_indicator.scale = Vector2(grid.tile_size, grid.tile_size) / wind_indicator.texture.get_size();
 

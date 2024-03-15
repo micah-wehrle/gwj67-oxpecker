@@ -17,6 +17,7 @@ var do_checkerboard = true;
 
 @onready var grid_parent = %"Grid Parent";
 @onready var animals_parent = %"Animals Parent";
+@onready var extra_sprite_parent = %"Extra Sprite Parent"
 
 @onready var animal_scene = preload("res://scenes/animal.tscn");
 
@@ -25,15 +26,16 @@ var acting_animal_list:Array[bool] = [];
 var animal_id_counter = 0;
 var are_any_animals_acting = false;
 
+var bird_start_pos;
+
 
 
 func _ready():
-	# change grid to (-605, -212)?
+	
+	# animals first to adjust exit height?
+	make_animals();
 	make_grid();
 	
-	make_animal("stump", Vector2(0,3), 1);
-	
-	make_animals();
 
 func _process(delta):
 	pass
@@ -82,6 +84,12 @@ func make_grid():
 				tile.self_modulate = Color(0.84, 1, 0.84);
 			
 			tile.position = Vector2((tile_size + tile_spacing) * x, (tile_size + tile_spacing) * y);
+			
+			if tile.get_child(0):
+				for xtra in extra_sprite_parent.get_children():
+					if xtra.global_position.distance_to(tile.global_position) < tile_size:
+						tile.get_child(0).queue_free();
+						break;
 	
 	for i in grid_height + 2:
 		for j in grid_width + 2:
@@ -196,27 +204,174 @@ func _animal_acting_state_changed(acting_id, is_acting):
 		are_any_animals_acting = any_acting_animals;
 		animals_are_acting.emit(are_any_animals_acting);
 
+func add_sprite(name, pos, rot = 0):
+	var sprite = Sprite2D.new();
+	extra_sprite_parent.add_child(sprite);
+	if name.substr(0, 5) == "arrow":
+		sprite.texture = load("res://res/tut_stuff1.png");
+		sprite.hframes = 3;
+		sprite.vframes = 3;
+		sprite.scale = Vector2(tile_size, tile_size) / Vector2(16, 16);
+		
+		sprite.frame = int(name.substr(5, 1)) - 1;
+		
+		sprite.self_modulate = Color(0, 0, 0, 0.3);
+	#match name:
+	
+	sprite.z_index = 4;
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST;
+	sprite.position = pos * (tile_size + tile_spacing);
+	sprite.rotation_degrees = rot;
+	pass;
+
+func bird_start(x, y):
+	make_animal("stump", Vector2(x, y), 1);
+	bird_start_pos = global_position + Vector2(x, y) * (tile_size + tile_spacing);
+
 
 
 func make_animals():
 	
 	match persist.current_level:
 		0:
-			make_animal("stump", Vector2(6,3), 1);
-			make_animal("stump", Vector2(6,0), 1);
-			make_animal("stump", Vector2(4,0), 1);
-			make_animal("stump", Vector2(4,4), 1);
-			make_animal("stump", Vector2(11,4), 1);
-			make_animal("stump", Vector2(11,2), 1);
+			bird_start(1, 3);
 			
-			make_animal("gorilla", Vector2(0,2), 2);
-			make_animal("stump", Vector2(2,2), 1);
-			make_animal("cow", Vector2(4,2), 3);
-			make_animal("turtle", Vector2(1,3), 3);
+			# short arrow
+			#add_sprite("arrow1", Vector2(3, 3));
+			#add_sprite("arrow2", Vector2(4, 3));
+			#add_sprite("arrow3", Vector2(5, 3));
 			
-			make_animal("deer", Vector2(10,2), 3);
+			# long arrow
+			add_sprite("arrow1", Vector2(2, 3));
+			add_sprite("arrow2", Vector2(3, 3));
+			add_sprite("arrow2", Vector2(4, 3));
+			add_sprite("arrow2", Vector2(5, 3));
+			add_sprite("arrow3", Vector2(6, 3));
+			
+			# wasd
+			add_sprite("arrow4", Vector2(4, 1));
+			add_sprite("arrow5", Vector2(3, 2));
+			add_sprite("arrow6", Vector2(4, 2));
+			add_sprite("arrow7", Vector2(5, 2));
+			
+			# up arrow
+			#add_sprite("arrow1", Vector2(7, 2), -90);
+			#add_sprite("arrow3", Vector2(7, 1), -90);
+			
+			make_animal("stump", Vector2(7, 3), 1);
+			make_animal("stump", Vector2(7, 0), 1);
+			make_animal("stump", Vector2(10, 0), 1);
+			make_animal("stump", Vector2(10, 2), 1);
+			
+			add_sprite("arrow1", Vector2(13, 2));
+			add_sprite("arrow2", Vector2(14, 2));
+			add_sprite("arrow3", Vector2(15, 2));
+			
+		1:
+			bird_start(3, 2);
+			
+			make_animal("cow", Vector2(6, 1), 3);
+			make_animal("stump", Vector2(3, 4), 1);
+			
+			# shorter level
+			#make_animal("stump", Vector2(9, 4), 1);
+			#make_animal("stump", Vector2(9, 2), 1);
+			
+			# longer level
+			make_animal("stump", Vector2(8, 4), 1);
+			make_animal("stump", Vector2(8, 0), 1);
+			make_animal("stump", Vector2(11, 0), 1);
+			make_animal("stump", Vector2(11, 2), 1);
+		
+		2:
+			exit_height = 3;
+			bird_start(2, 1);
+			
+			make_animal("stump", Vector2(2, 3), 1);
+			make_animal("cow", Vector2(4, 1), 3);
+			add_sprite("arrow8", Vector2(5, 1));
+			make_animal("cow", Vector2(9, 3), 4);
+			make_animal("stump", Vector2(11, 3), 1);
+			make_animal("stump", Vector2(11, 5), 1);
+		
+		3:
+			exit_height = 3;
+			bird_start(2,2);
+			
+			make_animal("cow", Vector2(2, 4), 2);
+			make_animal("cow", Vector2(4, 2), 1);
+			make_animal("cow", Vector2(7, 0), 3);
+			make_animal("cow", Vector2(9, 4), 1);
+			
+		"4 too hard":
+			bird_start(1,5);
+			
+			make_animal("rhino", Vector2(1, 2), 2);
+			make_animal("cow", Vector2(6, 2), 2);
+			make_animal("cow", Vector2(12, 2), 4);
+			make_animal("stump", Vector2(6, 5), 1);
+			make_animal("stump", Vector2(2, 4), 1);
+			make_animal("rhino", Vector2(2, 1), 1);
+			make_animal("stump", Vector2(2, 0), 1);
+			make_animal("stump", Vector2(9, 1), 1);
+			
+			
+			"""make_animal("rhino", Vector2(1, 2), 2);
+			make_animal("cow", Vector2(6, 2), 2);
+			make_animal("cow", Vector2(12, 2), 4);
+			make_animal("stump", Vector2(6, 5), 1);
+			make_animal("stump", Vector2(2, 4), 1);
+			make_animal("rhino", Vector2(2, 1), 2);
+			make_animal("stump", Vector2(2, 0), 1);
+			make_animal("stump", Vector2(9, 0), 1);
+			make_animal("stump", Vector2(13, 0), 1);
+			make_animal("stump", Vector2(8, 3), 1);"""
+			
+		4:
+			exit_height = 3;
+			
+			# maybe shift everything 3 tiles to the right
+			bird_start(2,5);
+			
+			make_animal("rhino", Vector2(2, 3), 2);
+			make_animal("cow", Vector2(13, 3), 4);
+			make_animal("cow", Vector2(6, 1), 3);
+			
+			make_animal("stump", Vector2(6, 0), 1);
+			make_animal("stump", Vector2(0, 0), 1);
+			make_animal("stump", Vector2(0, 3), 1);
+			make_animal("stump", Vector2(3, 1), 1);
+			
+			
+			
+			
+			#make_animal("", Vector2(, ), );
+			
+			
+			
+		_: # default
+			bird_start(6,2);
 
 
 
 	#make_animal("cow", Vector2(2, 3), 1);
 	#make_animal("deer", Vector2(6, 1), 3);
+	
+	
+	
+			#make_animal("stump", Vector2(6,3), 1);
+			#make_animal("stump", Vector2(6,0), 1);
+			#make_animal("stump", Vector2(4,0), 1);
+			#make_animal("stump", Vector2(4,4), 1);
+			#make_animal("stump", Vector2(11,4), 1);
+			#make_animal("stump", Vector2(11,2), 1);
+			
+			#make_animal("gorilla", Vector2(0,2), 2);
+			#make_animal("rhino", Vector2(0,2), 2);
+			#make_animal("stump", Vector2(2,2), 1);
+			#make_animal("cow", Vector2(4,2), 3);
+			#make_animal("cow", Vector2(4,1), 3);
+			#make_animal("turtle", Vector2(1,3), 3);
+			#make_animal("lion", Vector2(1,3), 3);
+			
+			#make_animal("deer", Vector2(10,2), 3);
