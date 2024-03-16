@@ -15,6 +15,7 @@ var reacting_to_event = false;
 var fulfilling_single_action = false;
 var current_reaction;
 var reaction_start_time;
+var final_attack = false;
 
 var true_arrow_pos;
 var arrow_time = 0;
@@ -30,7 +31,11 @@ var targ_scale;
 var targ_dir = null;
 const ROT_SPEED = 500;
 
+# passed in by grid!
+var camera;
+
 signal reaction_state_changed;
+signal began_action_step;
 
 @onready var body_sprite = $"Sprites/Body Sprite" as Sprite2D;
 @onready var dir_arrow = $"Sprites/Dir Arrow" as Node2D;
@@ -61,12 +66,14 @@ func init(animal_id, type, sprite_target_size, tile_spacing, pos, facing_dir, th
 	
 	var target_size_vec = Vector2(sprite_target_size, sprite_target_size);
 	
-	blood_total = 20;
-	blood_per_peck = 5;
+	blood_total = 3;
+	blood_per_peck = 1;
 	
 	var tex;
 	var sprite_scale_mult = 0.85;
 	match(type):
+		"bird":
+			tex = "res://res/bird1.png";
 		"cow":
 			tex = "res://res/cow1.png"; # should pre-load for reuse?
 		"deer":
@@ -95,6 +102,7 @@ func init(animal_id, type, sprite_target_size, tile_spacing, pos, facing_dir, th
 		"turtle":
 			tex = "res://res/turtle1.png";
 			slow_af = true;
+			dangerous = false;
 		
 	
 	var texture = load(tex) as CompressedTexture2D;
@@ -132,9 +140,13 @@ func _process(delta):
 			
 			# If we still have actions in the queue
 			if action_queue.size() != 0:
+				targ_move_pos = null;
+				start_move_pos = null;
+				true_move_pos = null;
 				current_reaction = action_queue.pop_front();
 				reaction_start_time = Time.get_ticks_msec();
 				fulfilling_single_action = true;
+				began_action_step.emit();
 			else:
 				change_reaction_state(false);
 		
@@ -148,7 +160,7 @@ func _process(delta):
 					true_move_pos = position;
 					var temp_global = global_position;
 					
-					var facing_to_use = facing_dir if current_reaction["value"] == -1 else current_reaction["value"];
+					var facing_to_use = facing_dir if !current_reaction.has("direction") else current_reaction["direction"];
 					
 					if facing_to_use == 1 or facing_to_use == 3:
 						var offset = (facing_to_use-2) * (sprite_target_size + tile_spacing);
@@ -162,74 +174,85 @@ func _process(delta):
 					var hit_animal = grid.is_pos_animal(temp_global)
 					var hit_wall = grid.is_pos_wall(temp_global)
 					
-					if hit_animal or hit_wall:
+					#print(hit_animal.type if hit_animal else '');
+					
+					if (hit_animal or hit_wall) and current_reaction["action"] != "bump":
 						
-						# TODO add run into effect!
-						#targ_move_pos = null;
 						if current_reaction["action"] == "move":
 							action_queue = [{
 								"action": "bump",
-								"value": 2
+								"direction": facing_to_use,
+								"bump halfway": false
 							}];
 						elif current_reaction["action"] == "charge":
 							if hit_animal and hit_animal.pushable and bully:
 								action_queue.push_front({
 									"action": "bump",
-									"value": 2,
-									"bullied animal": hit_animal
+									"bullied animal": hit_animal,
+									"direction": facing_to_use,
+									"bump halfway": false
 								})
 							else:
 								action_queue.push_front({
 									"action": "bump",
-									"value": 2,
+									"direction": facing_to_use,
+									"bump halfway": false
 								})
 						elif current_reaction["action"] == "muscle":
 							if hit_animal:
 								if hit_animal.pushable and bully:
 									action_queue.push_front({
 										"action": "bump",
-										"value": 2,
-										"bullied animal": hit_animal
+										"bullied animal": hit_animal,
+										"direction": facing_to_use,
+										"bump halfway": false
 									})
 								elif !hit_animal.pushable and strongman and hit_animal.destory_on_muscle:
 									action_queue.push_front({ # make this an overwrite?
 										"action": "bump",
-										"value": 2,
 										"bullied animal": hit_animal,
-										"destory animal": true
+										"destory animal": true,
+										"direction": facing_to_use,
+										"bump halfway": false
 									})
 							else:
 								action_queue.push_front({
 									"action": "bump",
-									"value": 2,
+									"direction": facing_to_use,
 								})
+								
 						fulfilling_single_action = false;
 				
 				if fulfilling_single_action:
-					var slow_offset = 1 if !("slow" in current_reaction) else 0.01;
+					var slow_offset = 1 if !(current_reaction.has("slow")) else 0.01;
 					true_move_pos = true_move_pos.move_toward(targ_move_pos, MOVE_SPEED * delta * slow_offset);
 					var hop_progress = (true_move_pos.distance_to(targ_move_pos) / start_move_pos.distance_to(targ_move_pos));
 					var temp_scale = sin(PI * hop_progress)
-					scale = Vector2(1 + temp_scale * 0.15 * slow_offset, 1 + temp_scale * 0.15 * slow_offset);
+					if !current_reaction.has("no height"):
+						scale = Vector2(1 + temp_scale * 0.15 * slow_offset, 1 + temp_scale * 0.15 * slow_offset);
 					
 					if current_reaction["action"] == "move":
 						position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2 * slow_offset);
 					else:
-						if hop_progress <= 0.5 and current_reaction["value"] == 2:
-							if bully and "bullied animal" in current_reaction:
+						if hop_progress <= 0.5 and current_reaction["action"] == "bump" and current_reaction["bump halfway"] == false:
+							
+							if bully and current_reaction.has("bullied animal"):
 								if "destory animal" in current_reaction:
 									current_reaction["bullied animal"].queue_free();
 								else:
 									current_reaction["bullied animal"].independant_react([{
 										"action": "move",
-										"value": facing_dir
+										"direction": facing_dir
 									}]);
-							current_reaction["value"] = 3;
+							current_reaction["bump halfway"] = true;
 							var temp = targ_move_pos;
 							targ_move_pos = start_move_pos;
 							start_move_pos = temp;
-							
-						position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2);
+						
+						if !current_reaction.has("no height"):
+							position = true_move_pos + Vector2(0,-temp_scale*sprite_target_size*0.2);
+						else:
+							position = true_move_pos;
 						
 					if true_move_pos == targ_move_pos:
 						position = true_move_pos;
@@ -271,9 +294,45 @@ func _process(delta):
 				if Time.get_ticks_msec() - reaction_start_time >= current_reaction["value"]:
 					fulfilling_single_action = false;
 			
+			elif current_reaction["action"] == "hop":
+				var slow_offset = 1 if !slow_af else 20;
+				var hop_len = 250.0;
+				if Time.get_ticks_msec() <= reaction_start_time + hop_len:
+					if !start_move_pos:
+						start_move_pos = position;
+					var time_left = reaction_start_time + hop_len - Time.get_ticks_msec();
+					var progress = 1 - time_left / hop_len;
+					scale = Vector2(1,1) * (1 + sin(progress * PI)*0.35);
+					position.y = start_move_pos.y - sin(progress * PI) * sprite_target_size * 0.2;
+				else:
+					position = start_move_pos;
+					scale = Vector2(1,1);
+					fulfilling_single_action = false;
+					
+					if current_reaction.has("loop") and current_reaction.has("delay"):
+						action_queue.push_front(current_reaction);
+						action_queue.push_front({
+							"action": "wait",
+							"value": randi_range(500,1500) * slow_offset
+						})
+						
 			elif current_reaction["action"] == "roar":
-				grid.give_queue_to_all_animals(null, self);
-				fulfilling_single_action = false;
+				if Time.get_ticks_msec() < reaction_start_time + 500 and !camera.shake:
+					camera.do_shake(true);
+				elif Time.get_ticks_msec() > reaction_start_time + 500:
+					camera.do_shake(false);
+					grid.give_queue_to_all_animals([{
+						"action": "wait",
+						"value": 100
+					}, {
+						"action": "hop",
+						"value": -1
+					}, {
+						"action": "wait",
+						"value": 250
+					}], self);
+					grid.give_queue_to_all_animals(null, self);
+					fulfilling_single_action = false;
 				pass;
 			pass;
 		pass;
@@ -306,6 +365,9 @@ func peck():
 	change_reaction_state(true);
 
 func build_own_queue():
+	if type == "stump":
+		return;
+	
 	match(type):
 		"cow":
 			move(1);
@@ -327,11 +389,13 @@ func build_own_queue():
 			});
 			
 
-func independant_react(queue_entry:Array):
+func independant_react(queue_entry:Array, override_stump = false):
+	if type == "stump" and !override_stump:
+		return;
 	for action in queue_entry:
 		action_queue.push_back(action);
 	
-	change_reaction_state(true);
+	change_reaction_state(true, override_stump);
 
 func move(amt):
 	for i in amt:
@@ -357,7 +421,11 @@ func special(spec):
 		"value": -1
 	});
 
-func change_reaction_state(state):
+func change_reaction_state(state, override_stump = false):
+	if type == "stump" and !override_stump:
+		return;
+	if !state:
+		reaction_start_time = null;
 	reacting_to_event = state;
 	reaction_state_changed.emit(animal_id, state);
 	danger_sprite.self_modulate.a = 0;
@@ -384,3 +452,20 @@ func get_attack_grid_pos():
 		output_pos.x -= offset;
 	
 	return grid.calc_grid_pos(output_pos);
+
+func stop_everything():
+	reacting_to_event = false;
+	fulfilling_single_action = false;
+	action_queue = [];
+	
+	if final_attack:
+		action_queue = [{
+			"action": "bump",
+			"bump halfway": false,
+			"no height": true
+		}];
+		reacting_to_event = true;
+
+func do_final_attack():
+	final_attack = true;
+	pass;

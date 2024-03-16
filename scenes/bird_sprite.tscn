@@ -81,7 +81,7 @@ z_index = 10
 texture_filter = 1
 scale = Vector2(11.25, 11.25)
 texture = ExtResource("1_dsga1")
-hframes = 7
+hframes = 8
 script = ExtResource("2_tmlht")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

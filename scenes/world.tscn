@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://ds77v8dt1we8g"]
+[gd_scene load_steps=19 format=3 uid="uid://ds77v8dt1we8g"]
 
 [ext_resource type="Script" path="res://scripts/Bird.gd" id="1_cpk6n"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_ve7bm"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://uex46dpftd8v" path="res://scenes/bird_sprite.tscn" id="3_ubdla"]
 [ext_resource type="Script" path="res://scripts/CanvasLayer.gd" id="4_axjsh"]
 [ext_resource type="Texture2D" uid="uid://ca7htac5qawpk" path="res://res/vial1/vial blood.png" id="4_yvomo"]
+[ext_resource type="Script" path="res://scripts/Camera.gd" id="5_7rvcl"]
 [ext_resource type="Script" path="res://scripts/Blood Bar.gd" id="5_ewaen"]
 [ext_resource type="Texture2D" uid="uid://bumw2tkn5qi1m" path="res://res/vial1/top vial.png" id="5_flmvg"]
 [ext_resource type="Texture2D" uid="uid://bp1kn4kipg4tc" path="res://res/ui_border2.png" id="9_7ed02"]
@@ -48,13 +49,17 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
-skew = 0.0174533
+unique_name_in_owner = true
+ignore_rotation = false
 zoom = Vector2(0.9, 0.9)
+script = ExtResource("5_7rvcl")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
 script = ExtResource("4_axjsh")
 
 [node name="Main Frame" type="Control" parent="CanvasLayer"]
+unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -125,7 +130,7 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Control"]
+[node name="Background Panel" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Control"]
 texture_filter = 1
 scale = Vector2(4.44, 4.44)
 texture = ExtResource("9_7ed02")
@@ -164,6 +169,7 @@ scale = Vector2(4.44, 4.44)
 texture = ExtResource("11_bs8us")
 
 [node name="Riding Frame" type="ReferenceRect" parent="CanvasLayer/Main Frame"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_right = 302.0
 offset_bottom = 158.0
@@ -260,17 +266,50 @@ texture_filter = 1
 scale = Vector2(4.44, 4.44)
 texture = ExtResource("10_b3okw")
 
+[node name="Game Over Text" type="ReferenceRect" parent="CanvasLayer/Main Frame"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -800.5
+offset_right = 800.5
+offset_bottom = 154.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/Main Frame/Game Over Text"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -86.0
+offset_top = -13.0
+offset_right = 86.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 100
+text = "Thank you for playing!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Screen Cover" type="ProgressBar" parent="CanvasLayer"]
 unique_name_in_owner = true
+visible = false
 z_index = 100
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_ixoo0")
 theme_override_styles/fill = SubResource("StyleBoxFlat_50yh7")
-step = 1.0
+step = 0.1
 value = 100.0
-fill_mode = 2
+fill_mode = 3
 show_percentage = false

@@ -15,6 +15,9 @@ var can_move = true;
 var flying = false;
 var flying_dir = 0;
 var target_pos;
+var dead = false;
+var flip_rate = 500.0;
+var end_pos = null;
 
 var current_animal;
 
@@ -40,12 +43,22 @@ func _process(delta):
 		if wind_indicator.self_modulate.a > 0:
 			wind_indicator.self_modulate.a -= delta * indicator_fade_rate;
 	
+	if dead:
+		var deg = bird_sprite.rotation_degrees
+		var progress = 1 - (deg / 180.0);
+		bird_sprite.rotation_degrees = move_toward(deg, 180, delta * flip_rate);
+		bird_sprite.position.y = -sin(PI * progress) * grid.tile_size * 0.5;
+		
+		if bird_sprite.rotation_degrees == 180:
+			dead = false;
+			grid.fade_out();
 	
 	if !can_move:    ####################################################
 		return;
 	
 	if !flying:
 		if get_dir_input():
+			blood_bar.add_blood(-1);
 			begin_flight(get_dir_input());
 		elif Input.is_action_just_pressed("Spacebar"):
 			if current_animal:
@@ -55,7 +68,11 @@ func _process(delta):
 		position.x = move_toward(position.x, target_pos.x, FLY_SPEED * delta);
 		position.y = move_toward(position.y, target_pos.y, FLY_SPEED * delta);
 		
-		if position.distance_to(target_pos) < 0.000001:
+		
+		if end_pos and global_position.distance_to(end_pos) < 10:
+			game_over();
+		
+		elif position == target_pos:
 			position = target_pos;
 			
 			current_animal = tile_on_beast();
@@ -64,6 +81,7 @@ func _process(delta):
 			elif current_animal:
 				stop_flying();
 				reparent(current_animal);
+				current_animal.connect("began_action_step", _riding_animal_began_action_step);
 				update_riding_texture();
 			else: # keep flying!
 				begin_flight(flying_dir);
@@ -96,8 +114,29 @@ func begin_flight(dir):
 	var tile_space = (grid.tile_size + grid.tile_spacing);
 	target_pos = position + get_dir_vector(flying_dir) * tile_space;
 	
-	current_animal = null;
+	if current_animal:
+		current_animal.disconnect("began_action_step", _riding_animal_began_action_step);
+		current_animal = null;
 	update_riding_texture();
+	
+	if !end_pos and blood_bar.get_blood() == 0:
+		end_pos = find_global_ending_pos();
+
+
+func find_global_ending_pos():
+	var check_pos = global_position;
+	var start_pos = check_pos;
+	var tile_space = (grid.tile_size + grid.tile_spacing);
+	var fly_vec = get_dir_vector(flying_dir) * tile_space;
+	var steps = 0;
+	while steps <= 20:
+		check_pos += fly_vec;
+		if grid.is_pos_wall(check_pos, true) or grid.is_pos_dangerous(check_pos) or grid.is_pos_animal(check_pos):
+			return start_pos + (check_pos - start_pos) / 2;
+		
+		steps += 1;
+	
+	return start_pos + fly_vec;
 
 func stop_flying():
 	bird_sprite.animate("resting");
@@ -141,7 +180,9 @@ func tile_is_dangerous():
 	
 	if grid_pos.x < 0 or grid_pos.y < 0 or (grid_pos.x >= grid.grid_width and grid_pos.y != grid.exit_height) or grid_pos.y >= grid.grid_height:
 		return true;
-	elif grid.is_pos_dangerous(grid_pos):
+	var danger_animal = grid.is_pos_dangerous(grid_pos)
+	if danger_animal:
+		danger_animal.do_final_attack();
 		return true;
 	elif grid_pos.x >= grid.grid_width + 2 and grid_pos.y == grid.exit_height:
 		persist.current_level += 1;
@@ -157,12 +198,17 @@ func try_to_bleed():
 	else:
 		pass; #handle no blood left?
 
-func _animal_acting_state_changed(state):
-	
-	if state:
+func _animal_acting_state_changed(is_acting):
+	if is_acting:
 		can_move = false
 	else:
 		can_move = true;
+
+func _riding_animal_began_action_step():
+	# just called to check for being in a dangrous square
+	if tile_is_dangerous():
+		game_over();
+		pass;
 
 func update_riding_texture():
 	if current_animal:
@@ -171,5 +217,10 @@ func update_riding_texture():
 
 func game_over():
 	can_move = false;
-	$"../..".fade_out();
-	pass;
+	grid.stop_processes();
+	bird_sprite.animation_player.stop();
+	die();
+
+func die():
+	bird_sprite.frame = 7;
+	dead = true;

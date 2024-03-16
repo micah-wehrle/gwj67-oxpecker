@@ -10,3 +10,8 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
+
+func hide_header():
+	%"Blood Bar".visible = false;
+	%"Riding Frame".visible = false;
+	%"Game Over Text".visible = true;

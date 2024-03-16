@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://ne4q7ef0brwl"]
+[gd_scene load_steps=4 format=3 uid="uid://ne4q7ef0brwl"]
 
 [ext_resource type="Script" path="res://scripts/Animal.gd" id="1_weynm"]
 [ext_resource type="Texture2D" uid="uid://dbkwovu3xh84d" path="res://res/arrow_and_warning1.png" id="2_wxj3o"]
+[ext_resource type="Script" path="res://scripts/Danger Space.gd" id="3_tiroq"]
 
 [node name="Animal" type="Node2D"]
 script = ExtResource("1_weynm")
@@ -29,6 +30,7 @@ texture = ExtResource("2_wxj3o")
 hframes = 2
 vframes = 2
 frame = 2
+script = ExtResource("3_tiroq")
 
 [node name="Dir Arrow Shadow" type="Sprite2D" parent="Sprites/Dir Arrow"]
 visible = false

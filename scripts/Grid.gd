@@ -18,6 +18,9 @@ var do_checkerboard = true;
 @onready var grid_parent = %"Grid Parent";
 @onready var animals_parent = %"Animals Parent";
 @onready var extra_sprite_parent = %"Extra Sprite Parent"
+@onready var camera = %Camera2D
+@onready var bird = $Bird
+@onready var blood_bar = %"Blood Bar"
 
 @onready var animal_scene = preload("res://scenes/animal.tscn");
 
@@ -27,6 +30,7 @@ var animal_id_counter = 0;
 var are_any_animals_acting = false;
 
 var bird_start_pos;
+var blood_start = 10;
 
 
 
@@ -85,7 +89,7 @@ func make_grid():
 			
 			tile.position = Vector2((tile_size + tile_spacing) * x, (tile_size + tile_spacing) * y);
 			
-			if tile.get_child(0):
+			if tile.get_children().size() > 0:
 				for xtra in extra_sprite_parent.get_children():
 					if xtra.global_position.distance_to(tile.global_position) < tile_size:
 						tile.get_child(0).queue_free();
@@ -151,6 +155,7 @@ func make_animal(type, pos, dir):
 	
 	animals_parent.add_child(animal);
 	animal.grid = self;
+	animal.camera = camera;
 	animal.init(animal_id_counter, type, tile_size, tile_spacing, pos * (tile_size + tile_spacing), dir, self);
 	acting_animal_list.push_back(false);
 	animal_id_counter += 1;
@@ -163,18 +168,21 @@ func is_pos_animal(pos):
 			return animal;
 	return null;
 
-func is_pos_wall(pos):
+func is_pos_wall(pos, ignore_exit_height = false):
 	var gpos = calc_grid_pos(pos);
-	if gpos.x < 0 or gpos.y < 0 or (gpos.x >= grid_width and gpos.y != exit_height) or gpos.y >= grid_height:
-		return true;
+	if ignore_exit_height:
+		if gpos.x < 0 or gpos.y < 0 or gpos.x >= grid_width or gpos.y >= grid_height:
+			return true;
+	else:
+		if gpos.x < 0 or gpos.y < 0 or (gpos.x >= grid_width and gpos.y != exit_height) or gpos.y >= grid_height:
+			return true;
 	return false;
 
 func is_pos_dangerous(pos):
 	for animal in animals_parent.get_children():
 		if animal.dangerous and pos == animal.get_attack_grid_pos():
-			return true;
-	return false;
-	pass;
+			return animal;
+	return null;
 
 func calc_grid_pos(pos):
 	return round( (pos - global_position) / (tile_size + tile_spacing) );
@@ -224,18 +232,43 @@ func add_sprite(name, pos, rot = 0):
 	sprite.rotation_degrees = rot;
 	pass;
 
-func bird_start(x, y):
-	make_animal("stump", Vector2(x, y), 1);
+func stop_processes():
+	for animal in animals_parent.get_children():
+		animal.stop_everything();
+	
+func fade_out():
+	$"..".fade_out();
+
+func setup_end_screen():
+	for animal in animals_parent.get_children():
+		animal.arrow_sprite.visible = false;
+		animal.danger_sprite.visible = false;
+		animal.independant_react([
+			{
+				"action": "hop",
+				"loop": true,
+				"delay": true,
+			}
+		], true);
+		
+	bird.can_move = false;
+	
+	%CanvasLayer.hide_header();
+
+func bird_start(x, y, make_stump = true):
+	if make_stump:
+		make_animal("stump", Vector2(x, y), 1);
 	bird_start_pos = global_position + Vector2(x, y) * (tile_size + tile_spacing);
 
-
+func setup_blood():
+	blood_bar.init_bar(blood_start * 1.0);
 
 func make_animals():
 	
 	match persist.current_level:
 		0:
 			bird_start(1, 3);
-			
+			blood_start = 7; # 5 steps 0 pecks
 			# short arrow
 			#add_sprite("arrow1", Vector2(3, 3));
 			#add_sprite("arrow2", Vector2(4, 3));
@@ -269,6 +302,7 @@ func make_animals():
 			
 		1:
 			bird_start(3, 2);
+			blood_start = 8; # 6 steps, 0 pecks
 			
 			make_animal("cow", Vector2(6, 1), 3);
 			make_animal("stump", Vector2(3, 4), 1);
@@ -285,6 +319,8 @@ func make_animals():
 		
 		2:
 			exit_height = 3;
+			blood_start = 3; # 4 steps, 4 pecks
+			
 			bird_start(2, 1);
 			
 			make_animal("stump", Vector2(2, 3), 1);
@@ -296,6 +332,8 @@ func make_animals():
 		
 		3:
 			exit_height = 3;
+			blood_start = 2; # mostly pecking
+			
 			bird_start(2,2);
 			
 			make_animal("cow", Vector2(2, 4), 2);
@@ -329,6 +367,7 @@ func make_animals():
 			
 		4:
 			exit_height = 3;
+			blood_start = 8; #just trust me, we wrote it out bro
 			
 			# maybe shift everything 3 tiles to the right
 			bird_start(2,5);
@@ -342,15 +381,41 @@ func make_animals():
 			make_animal("stump", Vector2(0, 3), 1);
 			make_animal("stump", Vector2(3, 1), 1);
 			
+		5:
+			exit_height = 3;
+			blood_start = 3;
+			
+			bird_start(9,4);
+			
+			make_animal("lion", Vector2(3,4), 3);
+			#make_animal("stump", Vector2(4,4), 3);
+			
+			make_animal("cow", Vector2(6,1), 2);
+			
+			make_animal("stump", Vector2(9,2), 1);
+			
+			make_animal("stump", Vector2(11,3), 1);
+			
+			make_animal("rhino", Vector2(9,5), 4);
+			
+			#make_animal("cow", Vector2(1, 0), 1);
+			#make_animal("cow", Vector2(0, 1), 4);
 			
 			
+		_: # default - game end!
+			exit_height = 100
+			bird_start(1000,1000, false);
+			make_animal("bird", Vector2(6,2), 1);
 			
-			#make_animal("", Vector2(, ), );
+			make_animal("gorilla", Vector2(3,1), 2);
+			make_animal("rhino", Vector2(1,2), 2);
+			make_animal("stump", Vector2(8,1), 1);
+			make_animal("cow", Vector2(4,3), 3);
+			make_animal("turtle", Vector2(12,3), 3);
+			make_animal("lion", Vector2(7,4), 3);
+			make_animal("deer", Vector2(10,2), 3);
 			
-			
-			
-		_: # default
-			bird_start(6,2);
+			setup_end_screen();
 
 
 
@@ -375,3 +440,5 @@ func make_animals():
 			#make_animal("lion", Vector2(1,3), 3);
 			
 			#make_animal("deer", Vector2(10,2), 3);
+	
+	setup_blood();

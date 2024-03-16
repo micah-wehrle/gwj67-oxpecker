@@ -2,18 +2,30 @@ extends Control
 
 var target_blood = 0.0;
 var cur_blood = 0.0;
-const MAX_BLOOD = 100.0;
+const MAX_BLOOD = 10.0;
 
 var bar_velocity = 0.0;
+
+var blood_adjustment_mult = 10.0;
 
 const STIFFNESS = 0.4;
 const DAMPING = 0.9;
 
-@onready var bar = $"Sub box/Blood Progress" as TextureProgressBar;
+var setup_blood_on_ready = false;
+
+@onready var bar = $"Blood Frame/TextureProgressBar" as TextureProgressBar;
+
+func init_bar(cur_blood):
+	self.cur_blood = cur_blood;
+	target_blood = cur_blood;
+	if !bar:
+		setup_blood_on_ready = true;
+	else:
+		bar.value = target_blood * blood_adjustment_mult;
 
 func _ready():
-	pass # Replace with function body.
-
+	if setup_blood_on_ready:
+		bar.value = target_blood * blood_adjustment_mult;
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -21,12 +33,16 @@ func _process(delta):
 		adjust_bar(delta);
 	pass
 
+
 func add_blood(val):
 	target_blood = clamp(target_blood + val, 0, MAX_BLOOD);
 
+func get_blood():
+	return target_blood;
+
 func adjust_bar(delta):
 	if abs(cur_blood - target_blood) < 0.5 and abs(bar_velocity) < 0.2:
-		bar.value = target_blood;
+		bar.value = target_blood * blood_adjustment_mult;
 		cur_blood = target_blood;
 		bar_velocity = 0;
 		return;
@@ -39,5 +55,5 @@ func adjust_bar(delta):
 	bar_velocity += force * delta;
 	cur_blood += bar_velocity;
 	
-	bar.value = cur_blood;
+	bar.value = cur_blood * blood_adjustment_mult;
 
