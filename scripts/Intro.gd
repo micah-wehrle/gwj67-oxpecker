@@ -6,6 +6,7 @@ extends ColorRect
 #Scene tiems to manipulate:
 @onready var description = %Description
 @onready var description_2 = %Description2
+@onready var description_3 = %Description3
 @onready var drinks = %Drinks
 @onready var their = %Their
 @onready var red_overlay = %"Red Overlay"
@@ -35,14 +36,13 @@ func _ready():
 		their.text = "THEM";
 		blood.text = "LOVE <3";
 		
-		var pink = Color.HOT_PINK; # or maybe eb3deb ?
-		
-		drinks.self_modulate = pink;
-		their.self_modulate = pink;
-		blood.self_modulate = pink;
-		
-		red_overlay.color = pink;
-		red_overlay.color.a = 0;
+	drinks.self_modulate = persist.blood_color;
+	their.self_modulate = persist.blood_color;
+	blood.self_modulate = persist.blood_color;
+	description_3.self_modulate = persist.blood_color
+	
+	red_overlay.color = persist.blood_color;
+	red_overlay.color.a = 0;
 		
 		
 		
@@ -111,6 +111,7 @@ func _process(delta):
 		bird_sprite.animate("peck");
 		description.modulate.a = 0;
 		description_2.modulate.a = 0;
+		description_3.visible = true;
 		scientific_name.modulate.a = 0;
 		drinks.modulate.a = 1;
 		phase = "red shift 1"

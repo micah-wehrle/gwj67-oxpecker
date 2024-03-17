@@ -87,6 +87,8 @@ func make_grid():
 			if (x + (y % 2)) % 2 == 0:
 				tile.self_modulate = Color(0.84, 1, 0.84);
 			
+			#tile.self_modulate *= Color(0.95, 0.95, 0.95, 1);
+			
 			tile.position = Vector2((tile_size + tile_spacing) * x, (tile_size + tile_spacing) * y);
 			
 			if tile.get_children().size() > 0:
@@ -164,7 +166,7 @@ func make_animal(type, pos, dir):
 
 func is_pos_animal(pos):
 	for animal in animals_parent.get_children():
-		if pos.distance_to(animal.global_position) < tile_size:
+		if pos.distance_to(animal.global_position) < tile_size/2:
 			return animal;
 	return null;
 
@@ -254,6 +256,11 @@ func setup_end_screen():
 	bird.can_move = false;
 	
 	%CanvasLayer.hide_header();
+	
+	await get_tree().create_timer(2.0).timeout;
+	
+	%"Left Confetti".emitting = true;
+	%"Right Confetti".emitting = true;
 
 func bird_start(x, y, make_stump = true):
 	if make_stump:
@@ -268,7 +275,7 @@ func make_animals():
 	match persist.current_level:
 		0:
 			bird_start(1, 3);
-			blood_start = 7; # 5 steps 0 pecks
+			blood_start = 7+1; # 5 steps 0 pecks
 			# short arrow
 			#add_sprite("arrow1", Vector2(3, 3));
 			#add_sprite("arrow2", Vector2(4, 3));
@@ -302,7 +309,7 @@ func make_animals():
 			
 		1:
 			bird_start(3, 2);
-			blood_start = 8; # 6 steps, 0 pecks
+			blood_start = 8+1; # 6 steps, 0 pecks
 			
 			make_animal("cow", Vector2(6, 1), 3);
 			make_animal("stump", Vector2(3, 4), 1);
@@ -319,20 +326,21 @@ func make_animals():
 		
 		2:
 			exit_height = 3;
-			blood_start = 3; # 4 steps, 4 pecks
+			blood_start = 3+1; # 4 steps, 4 pecks
 			
 			bird_start(2, 1);
 			
 			make_animal("stump", Vector2(2, 3), 1);
 			make_animal("cow", Vector2(4, 1), 3);
 			add_sprite("arrow8", Vector2(5, 1));
+			add_sprite("arrow9", Vector2(6, 1));
 			make_animal("cow", Vector2(9, 3), 4);
 			make_animal("stump", Vector2(11, 3), 1);
 			make_animal("stump", Vector2(11, 5), 1);
 		
 		3:
 			exit_height = 3;
-			blood_start = 2; # mostly pecking
+			blood_start = 3+1; # mostly pecking
 			
 			bird_start(2,2);
 			
@@ -400,6 +408,128 @@ func make_animals():
 			
 			#make_animal("cow", Vector2(1, 0), 1);
 			#make_animal("cow", Vector2(0, 1), 4);
+			
+		6:
+			exit_height = 1;
+			blood_start = 5;
+			
+			bird_start(1,5);
+			
+			make_animal("cow", Vector2(1,2), 2);
+			make_animal("cow", Vector2(4, 1), 4);
+			make_animal("cow", Vector2(11, 2), 1);
+			
+			make_animal("stump", Vector2(10, 5), 1);
+			make_animal("stump", Vector2(0, 4), 1);
+			
+			make_animal("rhino", Vector2(4, 5), 1);
+		
+		7:
+			blood_start = 4;
+			exit_height = 3;
+			bird_start(2,4);
+			
+			make_animal("turtle", Vector2(2,1), 2);
+			
+			make_animal("lion", Vector2(12,3), 3);
+			
+			make_animal("rhino", Vector2(3, 5), 2);
+			make_animal("stump", Vector2(2, 5), 1);
+			
+			make_animal("rhino", Vector2(13, 4), 1);
+			
+			make_animal("cow", Vector2(11, 0), 4);
+			
+			make_animal("cow", Vector2(0,2), 2);
+			
+			#for i in 7:
+			#	make_animal("cow", Vector2(i + 4, 1 + i%2*4), 3 - i%2*2);
+		
+		8:
+			blood_start = 5;
+			exit_height = 3;
+			
+			bird_start(0,1);
+			
+			make_animal("deer", Vector2(4,2), 2);
+			make_animal("deer", Vector2(9,1), 3);
+			make_animal("deer", Vector2(6,0), 4);
+			make_animal("stump", Vector2(7,0), 1);
+			#make_animal("stump", Vector2(9,0), 1);
+			
+			make_animal("cow", Vector2(13,0), 4);
+			
+			make_animal("deer", Vector2(1,4), 1);
+			make_animal("stump", Vector2(2,3), 1);
+			
+			make_animal("lion", Vector2(1,0), 2);
+			
+			
+			#make_animal("deer", Vector2(9,5), 1);
+			
+			make_animal("cow", Vector2(12, 0), 3);
+			
+			make_animal("cow", Vector2(11, 3), 4);
+			make_animal("stump", Vector2(10, 3), 1);
+			make_animal("cow", Vector2(11, 5), 4);
+			make_animal("stump", Vector2(10, 5), 1);
+			
+			
+		9:
+			bird_start(0,0);
+			blood_start = 4;
+			
+			var rng = RandomNumberGenerator.new();
+			rng.seed = 123;
+			
+			for y in grid_height:
+				for x in grid_width:
+					if (x + (y % 2)) % 2 == 1:
+						var dir = rng.randi_range(1,4);
+						if x == 13:
+							if y == 2:
+								dir = 1;
+							elif y == 4:
+								dir = 3;
+						make_animal("cow", Vector2(x, y), dir);
+		10:
+			
+			bird_start(2,3);
+			blood_start = 5;
+			
+			exit_height = 3
+			
+			make_animal("lion", Vector2(6, 3), 2);
+			
+			make_animal("stump", Vector2(6, 1), 1);
+			
+			make_animal("gorilla", Vector2(9, 1), 4);
+			
+			make_animal("deer", Vector2(10, 1), 2);
+			
+		11:
+			
+			bird_start(9,0);
+			blood_start = 4;
+			
+			make_animal("stump", Vector2(7,2), 1);
+			make_animal("stump", Vector2(10,2), 1);
+
+			make_animal("gorilla", Vector2(7,5), 1);
+			
+			make_animal("rhino", Vector2(3, 4), 1);
+			
+			make_animal("stump", Vector2(2,5), 1);
+			make_animal("stump", Vector2(3,1), 1);
+			
+			make_animal("lion", Vector2(1, 0), 3);
+			
+			
+		12:
+			
+			
+			
+			
 			
 			
 		_: # default - game end!

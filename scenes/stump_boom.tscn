@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfs7e7j4clj34"]
+
+[ext_resource type="Script" path="res://scripts/Stump_boom.gd" id="1_40j7u"]
+
+[node name="CPUParticles2D" type="CPUParticles2D"]
+emitting = false
+amount = 20
+one_shot = true
+explosiveness = 1.0
+direction = Vector2(0, -1)
+gravity = Vector2(0, 400)
+initial_velocity_min = 118.55
+initial_velocity_max = 201.02
+scale_amount_min = 10.0
+scale_amount_max = 15.0
+color = Color(0.317647, 0.168627, 0.145098, 1)
+script = ExtResource("1_40j7u")

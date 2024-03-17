@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://76pygpntmnjb"]
+
+[ext_resource type="Texture2D" uid="uid://c5e0eqb8xlfi6" path="res://res/single_pixel.png" id="1_5i6b8"]
+[ext_resource type="Script" path="res://scripts/Blood Emitter.gd" id="2_3rgkg"]
+
+[node name="Blood Emitter" type="CPUParticles2D"]
+self_modulate = Color(1, 0, 0, 1)
+scale = Vector2(0.0888889, 0.0888889)
+emitting = false
+amount = 10
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+texture = ExtResource("1_5i6b8")
+direction = Vector2(0, -10)
+spread = 90.0
+initial_velocity_max = 354.6
+linear_accel_min = 100.0
+linear_accel_max = 100.0
+scale_amount_min = 10.0
+scale_amount_max = 10.0
+script = ExtResource("2_3rgkg")

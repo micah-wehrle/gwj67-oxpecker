@@ -3,25 +3,29 @@
 [ext_resource type="Script" path="res://scripts/Bird.gd" id="1_cpk6n"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_ve7bm"]
 [ext_resource type="Script" path="res://scripts/Grid.gd" id="2_gq6m5"]
-[ext_resource type="Texture2D" uid="uid://ccnppldyfqd8" path="res://res/vial1/bottom vial.png" id="3_qvpt7"]
 [ext_resource type="PackedScene" uid="uid://uex46dpftd8v" path="res://scenes/bird_sprite.tscn" id="3_ubdla"]
 [ext_resource type="Script" path="res://scripts/CanvasLayer.gd" id="4_axjsh"]
-[ext_resource type="Texture2D" uid="uid://ca7htac5qawpk" path="res://res/vial1/vial blood.png" id="4_yvomo"]
 [ext_resource type="Script" path="res://scripts/Camera.gd" id="5_7rvcl"]
 [ext_resource type="Script" path="res://scripts/Blood Bar.gd" id="5_ewaen"]
-[ext_resource type="Texture2D" uid="uid://bumw2tkn5qi1m" path="res://res/vial1/top vial.png" id="5_flmvg"]
 [ext_resource type="Texture2D" uid="uid://bp1kn4kipg4tc" path="res://res/ui_border2.png" id="9_7ed02"]
 [ext_resource type="Texture2D" uid="uid://bs2psfh4r66bt" path="res://res/stump1.png" id="9_unesc"]
 [ext_resource type="Texture2D" uid="uid://cidxf4qabk88c" path="res://res/ui_border1.png" id="10_b3okw"]
 [ext_resource type="Texture2D" uid="uid://b6eku5ub7swwv" path="res://res/vial_blood.png" id="11_8qi3p"]
 [ext_resource type="Texture2D" uid="uid://ccomcevxwkdu6" path="res://res/vial_full2.png" id="11_bs8us"]
 [ext_resource type="Texture2D" uid="uid://d025k2y6u3bya" path="res://res/wind1.png" id="12_dta83"]
+[ext_resource type="PackedScene" uid="uid://76pygpntmnjb" path="res://scenes/blood_emitter.tscn" id="14_2i1nb"]
+[ext_resource type="Texture2D" uid="uid://cd0yulw37bdo4" path="res://res/ui_border3.png" id="18_3t4jc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ixoo0"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_50yh7"]
 bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="Curve" id="Curve_e44a8"]
+min_value = -1.0
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="World" type="Node2D"]
 script = ExtResource("1_ve7bm")
@@ -78,48 +82,6 @@ offset_bottom = 158.0
 grow_horizontal = 0
 script = ExtResource("5_ewaen")
 
-[node name="Sub box" type="Control" parent="CanvasLayer/Main Frame/Blood Bar"]
-visible = false
-z_index = 1
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -215.0
-offset_top = -50.5
-offset_right = 215.0
-offset_bottom = 50.5
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Bottom Vial" type="TextureRect" parent="CanvasLayer/Main Frame/Blood Bar/Sub box"]
-layout_mode = 0
-offset_left = -23.0
-offset_top = -188.0
-offset_right = 452.0
-offset_bottom = 287.0
-texture = ExtResource("3_qvpt7")
-
-[node name="Blood Progress" type="TextureProgressBar" parent="CanvasLayer/Main Frame/Blood Bar/Sub box"]
-layout_mode = 0
-offset_left = -29.0
-offset_top = -198.0
-offset_right = 446.0
-offset_bottom = 277.0
-min_value = -11.0
-max_value = 108.0
-texture_progress = ExtResource("4_yvomo")
-
-[node name="Top Vial" type="TextureRect" parent="CanvasLayer/Main Frame/Blood Bar/Sub box"]
-layout_mode = 0
-offset_left = -30.0
-offset_top = -198.0
-offset_right = 445.0
-offset_bottom = 277.0
-texture = ExtResource("5_flmvg")
-
 [node name="Control" type="Control" parent="CanvasLayer/Main Frame/Blood Bar"]
 layout_mode = 1
 anchors_preset = 8
@@ -130,12 +92,14 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background Panel" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Control"]
+[node name="Blood Background Panel" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Control"]
+unique_name_in_owner = true
 texture_filter = 1
 scale = Vector2(4.44, 4.44)
 texture = ExtResource("9_7ed02")
 
 [node name="Blood Frame" type="Control" parent="CanvasLayer/Main Frame/Blood Bar"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -146,6 +110,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TextureProgressBar" type="TextureProgressBar" parent="CanvasLayer/Main Frame/Blood Bar/Blood Frame"]
+z_index = 9
 texture_filter = 1
 layout_mode = 1
 anchors_preset = 8
@@ -163,10 +128,19 @@ scale = Vector2(4.44, 4.44)
 value = 50.0
 texture_progress = ExtResource("11_8qi3p")
 
-[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Blood Frame"]
+[node name="Blood Vial" type="Sprite2D" parent="CanvasLayer/Main Frame/Blood Bar/Blood Frame"]
+z_index = 10
 texture_filter = 1
 scale = Vector2(4.44, 4.44)
 texture = ExtResource("11_bs8us")
+
+[node name="Node2D" type="Node2D" parent="CanvasLayer/Main Frame/Blood Bar/Blood Frame"]
+z_index = 11
+scale = Vector2(11.25, 11.25)
+
+[node name="Bar Emitter" parent="CanvasLayer/Main Frame/Blood Bar/Blood Frame/Node2D" instance=ExtResource("14_2i1nb")]
+unique_name_in_owner = true
+position = Vector2(-21.2889, 1.77777)
 
 [node name="Riding Frame" type="ReferenceRect" parent="CanvasLayer/Main Frame"]
 unique_name_in_owner = true
@@ -279,22 +253,38 @@ offset_bottom = 154.0
 grow_horizontal = 2
 
 [node name="Label" type="Label" parent="CanvasLayer/Main Frame/Game Over Text"]
+z_index = 1
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -86.0
-offset_top = -13.0
-offset_right = 86.0
-offset_bottom = 13.0
+offset_left = -535.5
+offset_top = -74.0
+offset_right = 535.5
+offset_bottom = 66.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 100
 text = "Thank you for playing!"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Control" type="Control" parent="CanvasLayer/Main Frame/Game Over Text"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="CanvasLayer/Main Frame/Game Over Text/Control"]
+texture_filter = 1
+scale = Vector2(4.58442, 4.6875)
+texture = ExtResource("18_3t4jc")
 
 [node name="Screen Cover" type="ProgressBar" parent="CanvasLayer"]
 unique_name_in_owner = true
@@ -313,3 +303,43 @@ step = 0.1
 value = 100.0
 fill_mode = 3
 show_percentage = false
+
+[node name="Left Confetti" type="CPUParticles2D" parent="CanvasLayer"]
+unique_name_in_owner = true
+position = Vector2(3, 896)
+emitting = false
+amount = 50
+lifetime = 5.0
+explosiveness = 1.0
+randomness = 0.1
+direction = Vector2(0.3, -1)
+spread = 15.0
+gravity = Vector2(0, 500)
+initial_velocity_min = 659.8
+initial_velocity_max = 912.38
+scale_amount_min = 5.0
+scale_amount_max = 10.0
+color = Color(0.705882, 0.705882, 0.705882, 1)
+hue_variation_min = -1.0
+hue_variation_max = 1.0
+hue_variation_curve = SubResource("Curve_e44a8")
+
+[node name="Right Confetti" type="CPUParticles2D" parent="CanvasLayer"]
+unique_name_in_owner = true
+position = Vector2(1599, 896)
+emitting = false
+amount = 50
+lifetime = 5.0
+explosiveness = 1.0
+randomness = 0.1
+direction = Vector2(-0.3, -1)
+spread = 15.0
+gravity = Vector2(0, 500)
+initial_velocity_min = 659.8
+initial_velocity_max = 912.38
+scale_amount_min = 5.0
+scale_amount_max = 10.0
+color = Color(0.705882, 0.705882, 0.705882, 1)
+hue_variation_min = -1.0
+hue_variation_max = 1.0
+hue_variation_curve = SubResource("Curve_e44a8")

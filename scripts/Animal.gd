@@ -238,6 +238,10 @@ func _process(delta):
 							
 							if bully and current_reaction.has("bullied animal"):
 								if "destory animal" in current_reaction:
+									var emitter = preload("res://scenes/stump_boom.tscn");
+									var instance = emitter.instantiate();
+									grid.add_child(instance);
+									instance.global_position = current_reaction["bullied animal"].global_position;
 									current_reaction["bullied animal"].queue_free();
 								else:
 									current_reaction["bullied animal"].independant_react([{
@@ -373,7 +377,7 @@ func build_own_queue():
 			move(1);
 		"deer":
 			move(2);
-			turn(-1);
+			turn(1);
 		"lion":
 			special("roar");
 		"rhino":

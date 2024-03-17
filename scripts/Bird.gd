@@ -69,14 +69,12 @@ func _process(delta):
 		position.y = move_toward(position.y, target_pos.y, FLY_SPEED * delta);
 		
 		
-		if end_pos and global_position.distance_to(end_pos) < 10:
-			game_over();
-		
-		elif position == target_pos:
-			position = target_pos;
+		if position == target_pos:
 			
 			current_animal = tile_on_beast();
-			if tile_is_dangerous():
+			if blood_bar.get_blood() == 0:
+				game_over();
+			elif tile_is_dangerous():
 				game_over();
 			elif current_animal:
 				stop_flying();
@@ -119,8 +117,8 @@ func begin_flight(dir):
 		current_animal = null;
 	update_riding_texture();
 	
-	if !end_pos and blood_bar.get_blood() == 0:
-		end_pos = find_global_ending_pos();
+	if blood_bar.get_blood() == 0:
+		target_pos = find_global_ending_pos() - grid.global_position;
 
 
 func find_global_ending_pos():
