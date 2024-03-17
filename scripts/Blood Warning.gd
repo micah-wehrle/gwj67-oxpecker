@@ -77,6 +77,7 @@ func _bloodless_mode():
 	if target_time < INF:
 		return;
 	persist.show_blood = false;
+	persist.blood_color = Color.HOT_PINK;
 	next_scene();
 
 func next_scene():
