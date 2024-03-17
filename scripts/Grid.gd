@@ -21,6 +21,7 @@ var do_checkerboard = true;
 @onready var camera = %Camera2D
 @onready var bird = $Bird
 @onready var blood_bar = %"Blood Bar"
+@onready var sound_cloud = %"Sound Cloud"
 
 @onready var animal_scene = preload("res://scenes/animal.tscn");
 
@@ -157,6 +158,7 @@ func make_animal(type, pos, dir):
 	
 	animals_parent.add_child(animal);
 	animal.grid = self;
+	animal.sound_cloud = sound_cloud;
 	animal.camera = camera;
 	animal.init(animal_id_counter, type, tile_size, tile_spacing, pos * (tile_size + tile_spacing), dir, self);
 	acting_animal_list.push_back(false);
@@ -202,8 +204,9 @@ func give_queue_to_all_animals(action_queue, giver):
 		if action_queue:
 			animal.independant_react(action_queue);
 		else:
-			animal.build_own_queue();
-			animal.change_reaction_state(true);
+			if animal.type != "lion":
+				animal.build_own_queue();
+				animal.change_reaction_state(true);
 
 func _animal_acting_state_changed(acting_id, is_acting):
 	acting_animal_list[acting_id] = is_acting;
@@ -477,7 +480,7 @@ func make_animals():
 			
 		9:
 			bird_start(0,0);
-			blood_start = 4;
+			blood_start = 7; 
 			
 			var rng = RandomNumberGenerator.new();
 			rng.seed = 123;
@@ -526,13 +529,47 @@ func make_animals():
 			
 			
 		12:
+			bird_start(0,5);
+			
+			blood_start = 5;
+			exit_height = 1;
+			
+			make_animal("stump", Vector2(4,5), 1);
+			
+			make_animal("cow", Vector2(4,4), 1);
+			
+			#make_animal("stump", Vector2(0,0), 1);
+			
+			make_animal("rhino", Vector2(0, 2), 2);
+			
+			make_animal("cow", Vector2(4,0), 3);
+			
+			make_animal("lion", Vector2(7, 1), 2);
+			make_animal("deer", Vector2(11, 3), 4);
+			
+			make_animal("cow", Vector2(13, 3), 1);
+			
+			#make_animal("lion", Vector2(8,4), 1);
+			
+			make_animal("gorilla", Vector2(13,5), 1);
+			
+			make_animal("rhino", Vector2(8, 5), 4);
+			
+			#make_animal("cow", Vector2(12, 4), 4);
+			#make_animal("deer", Vector2(11, 4), 2);
+			
+			make_animal("lion", Vector2(11, 0), 4);
 			
 			
-			
-			
+		
+		15:
+			bird_start(12,5);
+			make_animal("lion", Vector2(13,5), 2);
+			make_animal("rhino", Vector2(12,4), 2);
 			
 			
 		_: # default - game end!
+			sound_cloud.disable_grass = true;
 			exit_height = 100
 			bird_start(1000,1000, false);
 			make_animal("bird", Vector2(6,2), 1);

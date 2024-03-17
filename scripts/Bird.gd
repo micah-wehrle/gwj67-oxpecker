@@ -6,6 +6,7 @@ extends Node2D
 @onready var bird_sprite = %"Bird Sprite" as Sprite2D;
 @onready var riding_indicator = %"Riding Indicator" as Sprite2D;
 @onready var wind_indicator = %"Wind Indicator" as Sprite2D;
+@onready var sound_cloud = %"Sound Cloud";
 
 var wind_texture = load("res://res/wind1.png");
 var indicator_fade_rate = 15;
@@ -18,6 +19,7 @@ var target_pos;
 var dead = false;
 var flip_rate = 500.0;
 var end_pos = null;
+var cur_level = persist.current_level;
 
 var current_animal;
 
@@ -25,6 +27,7 @@ const FLY_SPEED = 400.0;
 
 func _ready():
 	bird_sprite.scale = (Vector2(grid.tile_size, grid.tile_size) / Vector2(bird_sprite.texture.get_height(), bird_sprite.texture.get_height())) * 0.8;
+	bird_sprite.sound_cloud = sound_cloud;
 	grid.connect("animals_are_acting", _animal_acting_state_changed);
 	grid.connect('ready', _get_ready);
 
@@ -79,7 +82,7 @@ func _process(delta):
 			elif current_animal:
 				stop_flying();
 				reparent(current_animal);
-				current_animal.connect("began_action_step", _riding_animal_began_action_step);
+				current_animal.connect("changed_action_step", _riding_animal_began_action_step);
 				update_riding_texture();
 			else: # keep flying!
 				begin_flight(flying_dir);
@@ -113,7 +116,7 @@ func begin_flight(dir):
 	target_pos = position + get_dir_vector(flying_dir) * tile_space;
 	
 	if current_animal:
-		current_animal.disconnect("began_action_step", _riding_animal_began_action_step);
+		current_animal.disconnect("changed_action_step", _riding_animal_began_action_step);
 		current_animal = null;
 	update_riding_texture();
 	
@@ -165,6 +168,10 @@ func get_dir_vector(dir):
 	return Vector2();
 	
 func do_peck():
+	if current_animal.type == "stump":
+		sound_cloud.wood_hit();
+	else:
+		sound_cloud.play_peck();
 	try_to_bleed();
 	bird_sprite.animate("peck");
 	current_animal.peck()
@@ -200,13 +207,20 @@ func _animal_acting_state_changed(is_acting):
 	if is_acting:
 		can_move = false
 	else:
-		can_move = true;
+		if tile_is_dangerous():
+			game_over();
+		else:
+			can_move = true;
 
 func _riding_animal_began_action_step():
 	# just called to check for being in a dangrous square
 	if tile_is_dangerous():
 		game_over();
-		pass;
+	
+	var gpos = grid.calc_grid_pos(global_position);
+	if gpos.x > grid.grid_width + 3:
+		persist.current_level += 1;
+		game_over();
 
 func update_riding_texture():
 	if current_animal:
@@ -214,6 +228,11 @@ func update_riding_texture():
 		riding_indicator.scale = Vector2(grid.tile_size, grid.tile_size) / riding_indicator.texture.get_size();
 
 func game_over():
+	
+	if cur_level == persist.current_level:
+		sound_cloud.play_dead();
+	
+	sound_cloud.stop_flap();
 	can_move = false;
 	grid.stop_processes();
 	bird_sprite.animation_player.stop();

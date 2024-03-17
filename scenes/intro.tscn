@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://56sv35key23x"]
+[gd_scene load_steps=5 format=3 uid="uid://56sv35key23x"]
 
 [ext_resource type="Script" path="res://scripts/Intro.gd" id="1_octaw"]
 [ext_resource type="Texture2D" uid="uid://dmq3bjqrrxokl" path="res://res/cloud1.png" id="2_6hjtt"]
 [ext_resource type="PackedScene" uid="uid://uex46dpftd8v" path="res://scenes/bird_sprite.tscn" id="3_xkt36"]
+[ext_resource type="PackedScene" uid="uid://baguqeg434c0p" path="res://scenes/sound_cloud.tscn" id="4_57tf3"]
 
 [node name="Intro" type="ColorRect"]
 anchors_preset = 15
@@ -156,7 +157,7 @@ scale = Vector2(0.0888889, 0.0888889)
 unique_name_in_owner = true
 
 [node name="1" type="Marker2D" parent="Move Nodes"]
-position = Vector2(-469, 528)
+position = Vector2(-503, 552)
 
 [node name="2" type="Marker2D" parent="Move Nodes"]
 position = Vector2(529, 147)
@@ -195,3 +196,5 @@ theme_override_font_sizes/font_size = 150
 text = "BLOOD"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Sound Cloud" parent="." instance=ExtResource("4_57tf3")]

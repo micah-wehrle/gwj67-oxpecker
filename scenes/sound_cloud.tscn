@@ -1,0 +1,46 @@
+[gd_scene load_steps=10 format=3 uid="uid://baguqeg434c0p"]
+
+[ext_resource type="Script" path="res://scripts/Sound Cloud.gd" id="1_v4cvj"]
+[ext_resource type="AudioStream" uid="uid://d0fcovpcme5fd" path="res://sounds/Takeoff2 - 3:17:24, 12.44 AM.mp3" id="2_6uv15"]
+[ext_resource type="AudioStream" uid="uid://bfav6a2y77206" path="res://sounds/361753__lafashion__real-snap-21.wav" id="3_xjtff"]
+[ext_resource type="AudioStream" uid="uid://c2xfg2vq8hxuo" path="res://sounds/157955__adejabor__wood-hit-5.wav" id="4_73aeg"]
+[ext_resource type="AudioStream" uid="uid://pqvv6qgwuofs" path="res://sounds/footstep.wav" id="5_ky7jt"]
+[ext_resource type="AudioStream" uid="uid://cosmkyq3rpcpf" path="res://sounds/lion.mp3" id="6_bc0by"]
+[ext_resource type="AudioStream" uid="uid://bnck0avt0iy6f" path="res://sounds/wing-flap-1-6434.mp3" id="7_tpbex"]
+[ext_resource type="AudioStream" uid="uid://cn141dfv45t8h" path="res://sounds/dead.mp3" id="8_w83l4"]
+[ext_resource type="AudioStream" uid="uid://5kd1okhqxl0c" path="res://sounds/boom.wav" id="9_tnmg7"]
+
+[node name="Sound Cloud" type="Node2D"]
+script = ExtResource("1_v4cvj")
+
+[node name="Music" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_6uv15")
+volume_db = -10.246
+
+[node name="Peck" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_xjtff")
+volume_db = 9.811
+
+[node name="Thud" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_73aeg")
+
+[node name="Grass" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("5_ky7jt")
+volume_db = -4.906
+
+[node name="Lion" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_bc0by")
+
+[node name="Flap" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("7_tpbex")
+volume_db = 4.906
+
+[node name="Flap Timer" type="Timer" parent="Flap"]
+wait_time = 0.536
+
+[node name="Dead" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_w83l4")
+volume_db = 1.472
+
+[node name="Boom" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_tnmg7")

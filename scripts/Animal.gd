@@ -35,12 +35,13 @@ const ROT_SPEED = 500;
 var camera;
 
 signal reaction_state_changed;
-signal began_action_step;
+signal changed_action_step;
 
 @onready var body_sprite = $"Sprites/Body Sprite" as Sprite2D;
 @onready var dir_arrow = $"Sprites/Dir Arrow" as Node2D;
 @onready var arrow_sprite = $"Sprites/Dir Arrow/Dir Arrow Sprite" as Sprite2D;
 @onready var danger_sprite = $"Sprites/Dir Arrow/Danger Space Sprite" as Sprite2D;
+var sound_cloud;
 
 var dangerous = true;
 var pushable = true;
@@ -138,15 +139,17 @@ func _process(delta):
 		# If we're supposed to be reacting, but haven't started yet:
 		if !fulfilling_single_action:
 			
+			changed_action_step.emit();
+			
 			# If we still have actions in the queue
 			if action_queue.size() != 0:
+				sound_cloud.play_grass();
 				targ_move_pos = null;
 				start_move_pos = null;
 				true_move_pos = null;
 				current_reaction = action_queue.pop_front();
 				reaction_start_time = Time.get_ticks_msec();
 				fulfilling_single_action = true;
-				began_action_step.emit();
 			else:
 				change_reaction_state(false);
 		
@@ -259,7 +262,7 @@ func _process(delta):
 							position = true_move_pos;
 						
 					if true_move_pos == targ_move_pos:
-						position = true_move_pos;
+						position = targ_move_pos;
 						
 						if current_reaction["action"] == "charge":
 							action_queue.push_front(current_reaction);
@@ -321,9 +324,10 @@ func _process(delta):
 						})
 						
 			elif current_reaction["action"] == "roar":
-				if Time.get_ticks_msec() < reaction_start_time + 500 and !camera.shake:
+				if Time.get_ticks_msec() < reaction_start_time + 750 and !camera.shake:
+					sound_cloud.play_lion();
 					camera.do_shake(true);
-				elif Time.get_ticks_msec() > reaction_start_time + 500:
+				elif Time.get_ticks_msec() > reaction_start_time + 750:
 					camera.do_shake(false);
 					grid.give_queue_to_all_animals([{
 						"action": "wait",

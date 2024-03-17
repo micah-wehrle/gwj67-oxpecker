@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://ds77v8dt1we8g"]
+[gd_scene load_steps=20 format=3 uid="uid://ds77v8dt1we8g"]
 
 [ext_resource type="Script" path="res://scripts/Bird.gd" id="1_cpk6n"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_ve7bm"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://ccomcevxwkdu6" path="res://res/vial_full2.png" id="11_bs8us"]
 [ext_resource type="Texture2D" uid="uid://d025k2y6u3bya" path="res://res/wind1.png" id="12_dta83"]
 [ext_resource type="PackedScene" uid="uid://76pygpntmnjb" path="res://scenes/blood_emitter.tscn" id="14_2i1nb"]
+[ext_resource type="PackedScene" uid="uid://baguqeg434c0p" path="res://scenes/sound_cloud.tscn" id="16_tgx04"]
 [ext_resource type="Texture2D" uid="uid://cd0yulw37bdo4" path="res://res/ui_border3.png" id="18_3t4jc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ixoo0"]
@@ -343,3 +344,6 @@ color = Color(0.705882, 0.705882, 0.705882, 1)
 hue_variation_min = -1.0
 hue_variation_max = 1.0
 hue_variation_curve = SubResource("Curve_e44a8")
+
+[node name="Sound Cloud" parent="." instance=ExtResource("16_tgx04")]
+unique_name_in_owner = true

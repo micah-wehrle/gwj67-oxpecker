@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var screen_cover = %"Screen Cover"
+@onready var sound_cloud = %"Sound Cloud"
 
 var cover_val = 100;
 var start_rate = 5;
@@ -8,6 +9,9 @@ var accel = 1.09;
 var move_rate = start_rate;
 var fade_in = true;
 var do_fade_out = false;
+
+func _ready():
+	sound_cloud.start_music();
 
 func _process(delta):
 	if fade_in:
@@ -25,6 +29,7 @@ func _process(delta):
 		screen_cover.value = cover_val;
 		
 		if cover_val >= 100:
+			sound_cloud.store_music();
 			get_tree().reload_current_scene();
 
 func fade_out():

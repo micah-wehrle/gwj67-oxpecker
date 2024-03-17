@@ -13,8 +13,10 @@ extends ColorRect
 @onready var blood = %Blood
 @onready var scientific_name = %"Scientific Name"
 
+@onready var sound_cloud = $"Sound Cloud"
+
 const FADE_IN_RATE = 1;
-const FLY_RATE = 600;
+const FLY_RATE = 620;
 const HOP_X_RATE = 1000;
 const HOP_Y_SIZE = 40;
 const RED_FADE = 1.2;
@@ -29,6 +31,7 @@ var last_peck = false;
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	bird_sprite.sound_cloud = sound_cloud;
 	modulate = Color.BLACK;
 	
 	if !persist.show_blood:
@@ -109,6 +112,7 @@ func _process(delta):
 		wait_then("peck");
 	elif phase == "peck":
 		bird_sprite.animate("peck");
+		sound_cloud.play_boom();
 		description.modulate.a = 0;
 		description_2.modulate.a = 0;
 		description_3.visible = true;
@@ -124,6 +128,7 @@ func _process(delta):
 		
 	elif phase == "wait4":
 		if wait_then("red shift 2"):
+			sound_cloud.play_boom();
 			bird_sprite.animate("peck");
 			their.modulate.a = 1;
 			red_overlay.color.a = RED_OVERLAY_A;
@@ -134,6 +139,7 @@ func _process(delta):
 			advance_phase = Time.get_ticks_msec() + DRINKS_THEIR_DELAY;
 	elif phase == "wait5":
 		if wait_then("peck2"):
+			sound_cloud.play_boom();
 			bird_sprite.animate("peck");
 			(bird_sprite.animation_player as AnimationPlayer).connect("animation_finished", _anim_fin);
 	elif phase == "peck2":
