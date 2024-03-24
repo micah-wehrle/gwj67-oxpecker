@@ -32,7 +32,7 @@ func _restart_music():
 	music.play();
 	
 func start_music():
-	music.play(persist.last_song_time);
+	#music.play(persist.last_song_time);
 	music.connect("finished", _restart_music);
 
 func store_music():
